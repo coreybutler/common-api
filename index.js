@@ -1,7 +1,9 @@
+const chalk = require('chalk')
 const MustHave = require('musthave')
 const mh = new MustHave({
   throwOnError: false
 })
+const LaunchTime = (new Date()).toISOString()
 
 class Endpoint {
   constructor () {
@@ -185,6 +187,52 @@ class Endpoint {
 
   static NOT_IMPLEMENTED (req, res) {
     Endpoint.HTTP501(...arguments)
+  }
+
+  static litmusTest (content = 'LITMUS TEST') {
+    return (req, res, next) => {
+      console.log(chalk.cyan(content))
+      next()
+    }
+  }
+
+  static logErrors (err, req, res, next) {
+    if (err) {
+      console.log(chalk.red.bold(err.message))
+      return res.status(500).send(err.message)
+    }
+
+    next()
+  }
+
+  static log (req, res, next) {
+    console.log(chalk.gray(`${(new Date()).toLocaleFormat()}: `) + Endpoint.color(req.method).bold(req.method) + chalk.gray(` ${req.url}`)))
+    next()
+  }
+
+  static color (method) {
+    switch (method.trim().toLowerCase()) {
+      case 'post':
+        return chalk.green
+      case 'put':
+        return chalk.orange
+      case 'delete':
+        return chalk.red
+      case 'get':
+        return chalk.maroon
+      default:
+        return chalk.gray
+    }
+  }
+
+  static applyCommonConfiguration (app) {
+    // Rudimentary security
+    app.disable('x-powered-by')
+
+    // Healthcheck
+    const version = JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'package.json')).toString()).version
+    app.get('/ping', (req, res) => res.status(200).json({ runningSince: LaunchTime, version }))
+    app.get('/version', (req, res) => res.status(200).send(version))
   }
 }
 
