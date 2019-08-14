@@ -291,8 +291,12 @@ class Endpoint {
     // Healthcheck
     const version = JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'package.json')).toString()).version
     app.get('/ping', (req, res) => res.sendStatus(200))
-    app.get('/info', (req, res) => res.status(200).json({ runningSince: LaunchTime, version }))
     app.get('/version', (req, res) => res.status(200).send(version))
+    app.get('/info', (req, res) => res.status(200).json({
+      runningSince: LaunchTime,
+      version,
+      routes: Array.from(app._router ? app._router.stack : app.router || []).filter(r => r.route).map(r => r.route.path)
+    }))
   }
 }
 
