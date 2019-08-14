@@ -206,22 +206,45 @@ class Endpoint {
   }
 
   static log (req, res, next) {
-    console.log(chalk.gray(`${(new Date()).toLocaleFormat()}: `) + Endpoint.color(req.method).bold(req.method) + chalk.gray(` ${req.url}`)))
+    console.log(chalk.gray(`${(new Date()).toLocaleTimeString()}: `) + Endpoint.color(req.method)(req.method) + chalk.gray(` ${req.url}`))
+    next()
+  }
+
+  // Middleware for displaying headers.
+  // This is useful for identifying headers sourced
+  // from an API gateway or downstream proxy.
+  static logRequestHeaders (req, res, next) {
+    Object.keys(req.headers).forEach(header => console.log(chalk.cyan.bold(header.toLowerCase()) + ' --> ' + chalk.cyan(req.get(header))))
     next()
   }
 
   static color (method) {
-    switch (method.trim().toLowerCase()) {
-      case 'post':
-        return chalk.green
-      case 'put':
-        return chalk.orange
-      case 'delete':
-        return chalk.red
-      case 'get':
-        return chalk.maroon
-      default:
-        return chalk.gray
+    return function () {
+      let response = ''
+
+      switch ((method || 'unknown').trim().toLowerCase()) {
+        case 'post':
+          response = chalk.bgGreen(...arguments)
+          break
+
+        case 'put':
+          response = chalk.bgYellow(...arguments)
+          break
+
+        case 'delete':
+          response = chalk.bgRed(...arguments)
+          break
+
+        case 'get':
+          response = chalk.bgMagenta(...arguments)
+          break
+
+        default:
+          response = chalk.bgWhite(...arguments)
+          break
+      }
+
+      return response
     }
   }
 
@@ -231,7 +254,8 @@ class Endpoint {
 
     // Healthcheck
     const version = JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'package.json')).toString()).version
-    app.get('/ping', (req, res) => res.status(200).json({ runningSince: LaunchTime, version }))
+    app.get('/ping', (req, res) => res.sendStatus(200))
+    app.get('/info', (req, res) => res.status(200).json({ runningSince: LaunchTime, version }))
     app.get('/version', (req, res) => res.status(200).send(version))
   }
 }
