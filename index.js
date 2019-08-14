@@ -298,6 +298,29 @@ class Endpoint {
       routes: Array.from(app._router ? app._router.stack : app.router || []).filter(r => r.route).map(r => r.route.path)
     }))
   }
+
+  /**
+   * A helper method for dumping data into a response.
+   * @param {any} data
+   * This can be an object or a JavaScript primitive (string, number, etc)
+   */
+  static reply (data) {
+    if (typeof data !== 'object') {
+      try {
+        data = JSON.parse(data)
+      } catch (e) {
+        data = data.toString()
+      }
+    }
+
+    return (req, res) => {
+      if (typeof data === 'object') {
+        res.json(data)
+      } else {
+        res.send(data)
+      }
+    }
+  }
 }
 
 module.exports = Endpoint
