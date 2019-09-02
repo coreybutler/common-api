@@ -285,7 +285,7 @@ class Endpoint {
   }
 
   static applyCommonConfiguration (app) {
-    // Rudimentary security
+    // Rudimentary "security"
     app.disable('x-powered-by')
 
     // Healthcheck
@@ -297,6 +297,16 @@ class Endpoint {
       version,
       routes: Array.from(app._router ? app._router.stack : app.router || []).filter(r => r.route).map(r => r.route.path)
     }))
+  }
+
+  static applySimpleCORS (app, host='*') {
+    app.use((req, res, next) => {
+      res.setHeader('Access-Control-Allow-Origin', host)
+      res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+      res.setHeader('Access-Control-Allow-Methods','GET, POST, PATCH, DELETE, OPTIONS')
+      
+      next()
+    })
   }
 
   /**
