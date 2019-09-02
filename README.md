@@ -89,6 +89,14 @@ and the `deniedFn()` should be run when it fails.
 
 ### applyCommonConfiguration(app)
 
+```javascript
+const express = require('express')
+const app = express()
+const Endpoint = require('@ecor/common-api')
+
+Endpoint.applyCommonConfiguration(app)
+```
+
 This helper method is designed to rapidly implement common endpoints. This can be used throughout the testing phase or in production.
 
 The common configuration consists of 3 basic endpoints:
@@ -104,7 +112,16 @@ This also disables the `x-powered-by` header used in Express.
 
 ### applySimpleCORS(app, host='*')
 
-Implementing CORS support in an API can be time consuming while prototyping an API. This method applies a simple CORS configuration. It is unlikely this configuration will be used in production environments unless the API is behind a secure gateway. However; this configuration allows developers to bypass the most common challenges of _developing_ with CORS.
+```javascript
+const express = require('express')
+const app = express()
+const Endpoint = require('@ecor/common-api')
+
+Endpoint.applySimpleCORS(app)
+// Endpoint.applySimpleCORS(app, 'localhost')
+```
+
+Implementing CORS support while prototyping/developing an API can consume more time than most people anticipate. This method applies a simple CORS configuration so you can "continue coding". It is unlikely this configuration will be used in production environments unless the API is behind a secure gateway, but it helps temporarily resolve the most common challenges of _developing_ with CORS.
 
 This method applies 3 response headers to all responses:
 
