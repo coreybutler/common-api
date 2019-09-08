@@ -84,74 +84,6 @@ let checkResult = Endpoint.validResult(res, results => res.send(results))
 app.get('/endpoint', (req, res) => { ...processing... }, checkResult)
 ```
 
-### replyWithError(res, [status, message]|error)
-
-Send an HTTP error response. This function accepts two different kinds of arguments. The response is always the first argument. The method will also accept a custom HTTP status code and/or a custom plaintext message, as shown here:
-
-```javascript
-app.get('/myendpoint', (req, res) => {
-  if (problem === true) {
-    Endpoint.replyWithError(res, 400, 'There is a problem.')
-  }
-})
-```
-
-By default, an HTTP status code of `500` (Server Error) is used.
-
-Another option it to pass a JavaScript error as the last argument.
-
-```javascript
-app.get('/myendpoint', (req, res) => {
-  someFunction((err, data) => {
-    Endpoint.replyWithError(res, err)
-  })
-})
-
-// A custom HTTP status code can be used
-app.get('/myendpoint', (req, res) => {
-  someFunction((err, data) => {
-    Endpoint.replyWithError(res, 404, err)
-  })
-})
-```
-
-In the first example, an error is passed as the last argument. Using this approach, the response will have a `400` status and the message will be auto-extracted from the JavaScript error. The second example will do the same thing, but it will send a `404` status code instead of the default.
-
-### replyWithMaskedError(res, [status, message]|error)
-
-This functions very similarly to `replyWithError`, but a non-descript error message is sent to the client with a reference ID. The message/error is written to the console, making it possible to lookup actual error in the server logs.
-
-For example:
-
-```javascript
-app.get('/myendpoint', (req, res) => {
-  if (problem === true) {
-    Endpoint.replyWithMaskedError(res, 400, 'There is a problem connecting to the database.')
-  }
-})
-```
-
-The response _sent in the reply_ will actually look like:
-
-```
-400 An error occurred. Reference: eaac53bc-8b95-4e81-bc29-dead2a14c2ea
-```
-
-The logs would look like:
-
-```
-[ERROR:eaac53bc-8b95-4e81-bc29-dead2a14c2ea] (400) There was a problem connecting to the database.
-```
-
-### createUUID
-
-This utility method helps generate unique ID's. This is used to generatge the transaction ID for masked error output (`replyWithMaskedError` method).
-
-### atob(value)
-
-_ASCII to Binary_:
-This mimics the window.atob function. It is commonly used to extract username/password from a request.
-
 ### basicauth
 This method will perform basic authentication.
 It will compare the authentication header credentials
@@ -323,3 +255,75 @@ _Example:_
 ```javascript
 app.get('/path', Endpoint.reply(myJsonObject))
 ```
+
+### replyWithError(res, [status, message]|error)
+
+Send an HTTP error response. This function accepts two different kinds of arguments. The response is always the first argument. The method will also accept a custom HTTP status code and/or a custom plaintext message, as shown here:
+
+```javascript
+app.get('/myendpoint', (req, res) => {
+  if (problem === true) {
+    Endpoint.replyWithError(res, 400, 'There is a problem.')
+  }
+})
+```
+
+By default, an HTTP status code of `500` (Server Error) is used.
+
+Another option it to pass a JavaScript error as the last argument.
+
+```javascript
+app.get('/myendpoint', (req, res) => {
+  someFunction((err, data) => {
+    Endpoint.replyWithError(res, err)
+  })
+})
+
+// A custom HTTP status code can be used
+app.get('/myendpoint', (req, res) => {
+  someFunction((err, data) => {
+    Endpoint.replyWithError(res, 404, err)
+  })
+})
+```
+
+In the first example, an error is passed as the last argument. Using this approach, the response will have a `400` status and the message will be auto-extracted from the JavaScript error. The second example will do the same thing, but it will send a `404` status code instead of the default.
+
+### replyWithMaskedError(res, [status, message]|error)
+
+This functions very similarly to `replyWithError`, but a non-descript error message is sent to the client with a reference ID. The message/error is written to the console, making it possible to lookup actual error in the server logs.
+
+For example:
+
+```javascript
+app.get('/myendpoint', (req, res) => {
+  if (problem === true) {
+    Endpoint.replyWithMaskedError(res, 400, 'There is a problem connecting to the database.')
+  }
+})
+```
+
+The response _sent in the reply_ will actually look like:
+
+```
+400 An error occurred. Reference: eaac53bc-8b95-4e81-bc29-dead2a14c2ea
+```
+
+The logs would look like:
+
+```
+[ERROR:eaac53bc-8b95-4e81-bc29-dead2a14c2ea] (400) There was a problem connecting to the database.
+```
+
+---
+
+## Utilities
+
+### createUUID
+
+This utility method helps generate unique ID's. This is used to generatge the transaction ID for masked error output (`replyWithMaskedError` method).
+
+### atob(value)
+
+_ASCII to Binary_:
+This mimics the window.atob function. It is commonly used to extract username/password from a request.
