@@ -24,7 +24,8 @@ app.get('/test10', API.NOT_IMPLEMENTED)
 // app.get('/', (req, res) => res.sendStatus(200))
 app.post('/validbody', API.validateJsonBody(), API.OK)
 app.post('/validbody2', API.validateJsonBody('test'), API.OK)
-app.get('/forcederror', (req, res) => API.errorResponse(res, 477, 'custom_error'))
+app.get('/forcederror', (req, res) => API.replyWithError(res, 477, 'custom_error'))
+app.get('/forcederror2', (req, res) => API.replyWithMaskedError(res, 477, 'custom_error'))
 app.get('/entity/:id', API.validNumericId(), API.OK)
 app.get('/entity2/:id', API.validId(), API.OK)
 app.get('/authtest', API.basicauth('user', 'pass'), API.OK)
@@ -72,6 +73,14 @@ test('Custom Error', t => {
   client.get('/forcederror').on('response', res => {
     t.ok(res.statusCode === 477, 'Custom error code received.')
     t.ok(res.statusMessage === 'custom_error', 'Custom error message received.')
+    t.end()
+  })
+})
+
+test('Custom Masked Error', t => {
+  client.get('/forcederror2').on('response', res => {
+    t.ok(res.statusCode === 477, 'Custom error code received.')
+    t.ok(res.statusMessage.indexOf('Reference:') > 0, 'Masked error message received.')
     t.end()
   })
 })

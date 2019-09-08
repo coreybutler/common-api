@@ -5,18 +5,36 @@ const mh = new MustHave({
 })
 const LaunchTime = (new Date()).toISOString()
 
-class Endpoint {
-  constructor () {
-    console.log('test')
+const getRandomValues = buf => {
+  if (!(buf instanceof Uint8Array)) {
+    throw new TypeError('expected Uint8Array')
   }
 
+  if (buf.length > 65536) {
+    let e = new Error()
+    e.code = 22
+    e.message = 'Failed to execute \'getRandomValues\' on \'Crypto\': The ' +
+      'ArrayBufferView\'s byte length (' + buf.length + ') exceeds the ' +
+      'number of bytes of entropy available via this API (65536).'
+    e.name = 'QuotaExceededError'
+
+    throw e
+  }
+
+  let bytes = require('crypto').randomBytes(buf.length)
+  buf.set(bytes)
+
+  return buf
+}
+
+class Endpoint {
   // Last argument must be a callback.
   static validateJsonBody () {
     let args = Array.from(arguments)
 
     return function (req, res, next) {
       if (!req.hasOwnProperty('body') || typeof req.body !== 'object') {
-        return Endpoint.errorResponse(res, 400, 'No JSON body supplied.')
+        return Endpoint.replyWithError(res, 400, 'No JSON body supplied.')
       }
 
       if (args.length === 0) {
@@ -24,52 +42,18 @@ class Endpoint {
       }
 
       if (!mh.hasAll(req.body, ...args)) {
-        return Endpoint.errorResponse(res, 400, `Missing parameters: ${mh.missing.join(', ')}`)
+        return Endpoint.replyWithError(res, 400, `Missing parameters: ${mh.missing.join(', ')}`)
       }
 
       next()
     }
   }
 
-  static errorResponse (res, status = 500, message = 'Invalid Request') {
-    // If the last argument is an error, use it.
-    // if (arguments.length > 0) {//arguments[arguments.length - 1]) {
-    if (arguments[arguments.length - 1] instanceof Error) {
-      // let err = arguments[arguments.length - 1]
-      status = typeof status === 'number' ? status : 400
-
-      // Hide sensitive errors in non-debugging mode
-      // if (DEBUG) {
-      //   message = err.message
-      // } else {
-      //   if (['SQLError'].indexOf(err.name) >= 0) {
-      //     let id = NGN.DATA.util.GUID()
-      //
-      //     console.log(`[${id}] ${(new Date()).toISOString()} ${err.message}`)
-      //
-      //     message = `Server Error (#${id})`
-      //   } else {
-      //     message = err.message
-      //   }
-      // }
-    }
-
-    if (status >= 500) {
-      console.log('server.incident', {
-        name: 'Server Error',
-        message: message
-      })
-    }
-
-    res.statusMessage = message
-    res.status(status).json({ status, message })
-  }
-
   // Adds an `id` attribute to the request object.
   static validNumericId (parameter = 'id') {
     return function (req, res, next) {
       if (!req.params[parameter]) {
-        return Endpoint.errorResponse(res, 400, 'No ID specified in URL.')
+        return Endpoint.replyWithError(res, 400, 'No ID specified in URL.')
       }
 
       try {
@@ -82,7 +66,7 @@ class Endpoint {
         req.id = id
         next()
       } catch (e) {
-        return Endpoint.errorResponse(res, 400, e.message)
+        return Endpoint.replyWithError(res, 400, e.message)
       }
     }
   }
@@ -91,7 +75,7 @@ class Endpoint {
   static validId (parameter = 'id') {
     return function (req, res, next) {
       if (!req.params[parameter]) {
-        return Endpoint.errorResponse(res, 400, 'No ID specified in URL.')
+        return Endpoint.replyWithError(res, 400, 'No ID specified in URL.')
       }
 
       try {
@@ -102,7 +86,7 @@ class Endpoint {
         req.id = req.params[parameter]
         next()
       } catch (e) {
-        return Endpoint.errorResponse(res, 400, e.message)
+        return Endpoint.replyWithError(res, 400, e.message)
       }
     }
   }
@@ -111,10 +95,10 @@ class Endpoint {
   //   return (err, result) => {
   //     if (err) {
   //       if (err.message.indexOf('does not exist')) {
-  //         return Endpoint.errorResponse(res, 404, err)
+  //         return Endpoint.replyWithError(res, 404, err)
   //       }
   //
-  //       return Endpoint.errorResponse(res, 500, err)
+  //       return Endpoint.replyWithError(res, 500, err)
   //     }
   //
   //     callback(result)
@@ -235,7 +219,10 @@ class Endpoint {
   static logErrors (err, req, res, next) {
     if (err) {
       console.log(chalk.red.bold(err.message))
-      return res.status(500).send(err.message)
+
+      if (typeof next !== 'function') {
+        return res.status(500).send(err.message)
+      }
     }
 
     next()
@@ -284,9 +271,14 @@ class Endpoint {
     }
   }
 
-  static applyCommonConfiguration (app) {
+  static applyCommonConfiguration (app, autolog = true) {
     // Rudimentary "security"
     app.disable('x-powered-by')
+
+    // Basic logging
+    if (autolog) {
+      app.use(Endpoint.log)
+    }
 
     // Healthcheck
     const version = JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'package.json')).toString()).version
@@ -299,12 +291,12 @@ class Endpoint {
     }))
   }
 
-  static applySimpleCORS (app, host='*') {
+  static applySimpleCORS (app, host = '*') {
     app.use((req, res, next) => {
       res.setHeader('Access-Control-Allow-Origin', host)
       res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-      res.setHeader('Access-Control-Allow-Methods','GET, POST, PATCH, DELETE, OPTIONS')
-      
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
+
       next()
     })
   }
@@ -330,6 +322,45 @@ class Endpoint {
         res.send(data)
       }
     }
+  }
+
+  static replyWithMaskedError (res, status = 500, message = 'Server Error') {
+    let txnId = Endpoint.createUUID()
+
+    if (arguments[arguments.length - 1] instanceof Error) {
+      status = typeof status === 'number' ? status : 400
+      message = arguments[arguments.length - 1].message
+    }
+
+    console.log(`[ERROR:${txnId}] (${status}) ${message}`)
+
+    Endpoint.replyWithError(res, status, `An error occurred. Reference: ${txnId}`)
+  }
+
+  static replyWithError (res, status = 500, message = 'Server Error') {
+    // If the last argument is an error, use it.
+    // if (arguments.length > 0) {//arguments[arguments.length - 1]) {
+    if (arguments[arguments.length - 1] instanceof Error) {
+      status = typeof status === 'number' ? status : 400
+      message = arguments[arguments.length - 1].message
+    }
+
+    if (status >= 500) {
+      console.log('server.incident', {
+        name: 'Server Error',
+        message: message
+      })
+    }
+
+    res.statusMessage = message
+    res.status(status).json({ status, message })
+  }
+
+  // Create a UUIDv4 unique ID.
+  static createUUID () {
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+      (c ^ getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    )
   }
 }
 
