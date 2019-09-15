@@ -29,6 +29,7 @@ app.get('/forcederror2', (req, res) => API.replyWithMaskedError(res, 477, 'custo
 app.get('/entity/:id', API.validNumericId(), API.OK)
 app.get('/entity2/:id', API.validId(), API.OK)
 app.get('/authtest', API.basicauth('user', 'pass'), API.OK)
+app.get('/bearertest', API.bearer('mytoken'), API.OK)
 
 let service // eslint-disable-line no-unused-vars
 let client
@@ -159,7 +160,7 @@ test('Validate any ID', t => {
     })
 })
 
-test('Basic authentication', t => {
+test('Authentication', t => {
   let subtasks = new TaskRunner()
 
   subtasks.add(next => {
@@ -170,7 +171,7 @@ test('Basic authentication', t => {
       }
     })
       .on('response', res => {
-        t.ok(res.statusCode === 200, 'Successfully authenticated.')
+        t.ok(res.statusCode === 200, 'Successfully authenticated with basic auth.')
         next()
       })
   })
@@ -183,7 +184,31 @@ test('Basic authentication', t => {
       }
     })
       .on('response', res => {
-        t.ok(res.statusCode === 401, 'Invalid credentials receive "unauthorized" response.')
+        t.ok(res.statusCode === 401, 'Invalid credentials receive "unauthorized" response with basic auth.')
+        next()
+      })
+  })
+
+  subtasks.add(next => {
+    client.get('/bearertest', {
+      headers: {
+        Authorization: 'Bearer mytoken'
+      }
+    })
+      .on('response', res => {
+        t.ok(res.statusCode === 200, 'Successfully authenticated with bearer token.')
+        next()
+      })
+  })
+
+  subtasks.add(next => {
+    client.get('/bearertest', {
+      headers: {
+        Authorization: 'Bearer badtoken'
+      }
+    })
+      .on('response', res => {
+        t.ok(res.statusCode === 401, 'Invalid credentials receive "unauthorized" response with bearer token.')
         next()
       })
   })

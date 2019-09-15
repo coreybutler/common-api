@@ -114,6 +114,29 @@ The `username`/`password` will be supplied in plain text. The
 `grantedFn()` should be run when user authentication succeeds,
 and the `deniedFn()` should be run when it fails.
 
+### bearer
+This method looks for a bearer token in the `Authorization` request header. If the token does not match, a `401 (Unauthorized)` status is returned.
+
+```javascript
+app.get('/secure/path', Endpoint.bearer('mytoken'), Endpoint.reply('authenticated'))
+```
+
+The code above would succeed for requests which contain the following request header:
+
+```sh
+Authorization: Bearer mytoken
+```
+
+> The case-insensitive keyword "bearer" is required for this to work.
+
+It is also possible to use a custom function to evaluate the request token. The function must by synchronous and return a boolean value (`true` or `false`).
+
+```javascript
+app.get('/secure/path', Endpoint.bearer(function (token) {
+  return isValidToken(token)
+}), Endpoint.reply('authenticated'))
+```
+
 ### applyCommonConfiguration(app, [autolog])
 
 ```javascript

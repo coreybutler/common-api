@@ -169,6 +169,48 @@ class Endpoint {
     }
   }
 
+  /**
+   * This method accepts a bearer token in the Authorization request header.
+   * For example, the request header ma look like:
+   *
+   * `Authorization: bearer 123myToken456`
+   *
+   * The token is `123myToken456`. The middleware for this
+   * token would be applied as follows:
+   *
+   * ```javascript
+   * app.get('/mypath', Endpoint.bearer('123myToken456'), ...)
+   * ```
+   * @param {string|function} token
+   * The token can be a single string or a **synchronous** function that resolves to a **boolean** (i.e. `true` if the token is valid or `false` if it is not).
+   * The function will receive the token and request as the argument.
+   * @param {boolean} [caseSensitive=true]
+   * Determines whether the token comparison should be case sensitive or not.
+   * This is ignored if the token argument is a custom function.
+   */
+  static bearer (token, caseSensitive = true) {
+    return function (req, res, next) {
+      if (req.get('authorization')) {
+        let input = req.get('authorization').replace(/^(\s+)?bearer(\s+)?/i, '')
+
+        if (typeof token === 'function') {
+          return token(input) ? next() : res.sendStatus(401)
+        }
+
+        if (!caseSensitive) {
+          input = input.toLowerCase()
+          token = token.toLowerCase()
+        }
+
+        if (input === token) {
+          return next()
+        }
+      }
+
+      res.sendStatus(401)
+    }
+  }
+
   static HTTP200 (req, res) {
     res.sendStatus(200)
   }
