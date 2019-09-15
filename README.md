@@ -44,7 +44,7 @@ const server = app.listen(() => console.log('Server is running.'))
 - [NOT_FOUND](#NOT_FOUND)
 - [501](#501)
 - [NOT_IMPLEMENTED](#NOT_IMPLEMENTED)
-- [reply](#reply)
+- [reply(anything)](#reply)
 - [replyWithError(res, [status, message]|error)](#replywitherrorres-status-messageerror)
 - [replyWithMaskedError(res, [status, message]|error)](#replywithmaskederrorres-status-messageerror)
 
@@ -307,7 +307,7 @@ app.post('/endpoint', Endpoint.NOT_IMPLEMENTED)
 
 Sends a status code `501` response.
 
-### reply
+### reply(anything)
 
 A helper method to send objects as a JSON response, or to send plain text. This function attempts to automatically determine the appropriate response header type.
 
