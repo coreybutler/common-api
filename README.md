@@ -51,6 +51,8 @@ const server = app.listen(() => console.log('Server is running.'))
 ### [Utilities](#Utilities)
 - [createUUID](#createUUID)
 - [atob(value)](#atob(value))
+- [applyBaseUrl (req, route = '/' [, forceTLS = false])](#applybaseurl-req-route---forcetls--false)
+- [applyRelativeUrl (req, route = '/' [, forceTLS = false])](#applyrelativeurl-req-route---forcetls--false)
 
 ## Middleware
 
