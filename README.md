@@ -18,6 +18,40 @@ app.post('/endpoint', Endpoint.validateJsonBody, (req, res) => { ... })
 const server = app.listen(() => console.log('Server is running.'))
 ```
 
+## Shortcuts
+
+### [Request Middleware](#Middleware)
+- [log](#log)
+- [logRequestHeaders](#logRequestHeaders)
+- [litmusTest([message])](#litmusTest([message]))
+- [validateJsonBody](#validateJsonBody)
+- [validNumericId](#validNumericId)
+- [validStringId](#validStringId)
+- [validResult(res, callback)](#validResult(res, callback))
+- [basicauth](#basicauth)
+- [bearer](#bearer)
+- [applyCommonConfiguration(app, [autolog])](#applyCommonConfiguration(app, [autolog]))
+- [applySimpleCORS(app, host='*')](#applySimpleCORS(app, host='*'))
+
+### [Responses](#Responses)
+- [200](#200)
+- [OK](#OK)
+- [201](#201)
+- [CREATED](#CREATED)
+- [401](#401)
+- [UNAUTHORIZED](#UNAUTHORIZED)
+- [404](#404)
+- [NOT_FOUND](#NOT_FOUND)
+- [501](#501)
+- [NOT_IMPLEMENTED](#NOT_IMPLEMENTED)
+- [reply](#reply)
+- [replyWithError(res, [status, message]|error)](#replyWithError(res, [status, message]|error))
+- [replyWithMaskedError(res, [status, message]|error)](#replyWithMaskedError(res, [status, message]|error))
+
+### [Utilities](#Utilities)
+- [createUUID](#createUUID)
+- [atob(value)](#atob(value))
+
 ## Middleware
 
 The following static methods are available:
