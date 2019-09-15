@@ -122,7 +122,7 @@ let checkResult = Endpoint.validResult(res, results => res.send(results))
 app.get('/endpoint', (req, res) => { ...processing... }, checkResult)
 ```
 
-### basicauth
+### basicauth(user, pass)
 This method will perform basic authentication.
 It will compare the authentication header credentials
 with the username and password.
@@ -152,7 +152,7 @@ The `username`/`password` will be supplied in plain text. The
 `grantedFn()` should be run when user authentication succeeds,
 and the `deniedFn()` should be run when it fails.
 
-### bearer
+### bearer(token)
 This method looks for a bearer token in the `Authorization` request header. If the token does not match, a `401 (Unauthorized)` status is returned.
 
 ```javascript
