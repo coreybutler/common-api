@@ -9,9 +9,13 @@ This is a lightweight library containing a few commonly used methods for creatin
 ## Usage
 
 ```javascript
+const express = require('express')
 const Endpoint = require('@ecor/common-api')
+const app = express()
 
 app.post('/endpoint', Endpoint.validateJsonBody, (req, res) => { ... })
+
+const server = app.listen(() => console.log('Server is running.'))
 ```
 
 ## Middleware
