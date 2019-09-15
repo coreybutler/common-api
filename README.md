@@ -28,8 +28,8 @@ const server = app.listen(() => console.log('Server is running.'))
 - [validNumericId](#validNumericId)
 - [validStringId](#validStringId)
 - [validResult(res, callback)](#validresultres-callback)
-- [basicauth](#basicauth)
-- [bearer](#bearer)
+- [basicauth(user, password)](#basicauth)
+- [bearer(token)](#bearer)
 - [applyCommonConfiguration(app, [autolog])](#applycommonconfigurationapp-autolog)
 - [applySimpleCORS(app, host='*')](#applysimplecorsapp-host)
 
@@ -122,7 +122,7 @@ let checkResult = Endpoint.validResult(res, results => res.send(results))
 app.get('/endpoint', (req, res) => { ...processing... }, checkResult)
 ```
 
-### basicauth(user, pass)
+### basicauth(user, password)
 This method will perform basic authentication.
 It will compare the authentication header credentials
 with the username and password.
