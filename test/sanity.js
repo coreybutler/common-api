@@ -30,15 +30,17 @@ app.get('/entity/:id', API.validNumericId(), API.OK)
 app.get('/entity2/:id', API.validId(), API.OK)
 app.get('/authtest', API.basicauth('user', 'pass'), API.OK)
 app.get('/bearertest', API.bearer('mytoken'), API.OK)
+app.get('/baseurl/test', (req, res) => res.send(API.applyBaseUrl(req, '/fakeid')))
+app.get('/baseurl/test2', (req, res) => res.send(API.applyRelativeUrl(req, '/fakeid')))
 
 let service // eslint-disable-line no-unused-vars
 let client
+let baseUrl
 
 tasks.add('Launch Test Server', next => {
   service = server.listen(0, '127.0.0.1', () => {
-    client = request.defaults({
-      baseUrl: `http://${server.address().address}:${server.address().port}`
-    })
+    baseUrl = `http://${server.address().address}:${server.address().port}`
+    client = request.defaults({ baseUrl })
 
     next()
   })
@@ -215,6 +217,30 @@ test('Authentication', t => {
 
   subtasks.on('complete', t.end)
   subtasks.run(true)
+})
+
+test('Apply BaseURL', t => {
+  client.get('/baseurl/test', { timeout: 1500 })
+    .on('response', res => {
+      let data = ''
+      res.on('data', chunk => { data += chunk.toString() })
+      res.on('end', () => {
+        t.ok(data === `${baseUrl}/fakeid`, 'Successfully identified base URL.')
+        t.end()
+      })
+    })
+})
+
+test('Apply Relative URL', t => {
+  client.get('/baseurl/test2', { timeout: 1500 })
+    .on('response', res => {
+      let data = ''
+      res.on('data', chunk => { data += chunk.toString() })
+      res.on('end', () => {
+        t.ok(data === `${baseUrl}/baseurl/test2/fakeid`, 'Successfully identified relative URL.')
+        t.end()
+      })
+    })
 })
 
 tasks.on('complete', () => server.close())

@@ -388,3 +388,45 @@ This utility method helps generate unique ID's. This is used to generatge the tr
 
 _ASCII to Binary_:
 This mimics the window.atob function. It is commonly used to extract username/password from a request.
+
+### applyBaseUrl (req, route = '/', forceTLS = false)
+
+Apply the base URL to the specified route. If `forceTLS` is set to `true`, the response will always use the `https` protocol.
+
+```javascript
+app.get('/my/path', (req, res) => {
+  res.json({
+    id: Endpoint.applyBaseURL(req, 'myid')
+  })
+})
+```
+
+If a request was made to `http://domain.com/my/path`, this would return:
+
+```json
+{
+  "id": "http://domain.com/myid"
+}
+```
+
+
+
+### applyRelativeUrl (req, route = '/', forceTLS = false)
+
+Apply the relative URL to the specified route. If `forceTLS` is set to `true`, the response will always use the `https` protocol.
+
+```javascript
+app.get('/my/path', (req, res) => {
+  res.json({
+    id: Endpoint.applyBaseURL(req, 'myid')
+  })
+})
+```
+
+If a request was made to `http://domain.com/my/path`, this would return:
+
+```json
+{
+  "id": "http://domain.com/my/path/myid"
+}
+```

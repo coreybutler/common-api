@@ -404,6 +404,14 @@ class Endpoint {
       (c ^ getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     )
   }
+
+  static applyBaseUrl (req, route = '/', forceTLS = false) {
+    return `${forceTLS ? 'https' : req.protocol}://${req.get('host')}${route}`
+  }
+
+  static applyRelativeUrl (req, route = '/', forceTLS = false) {
+    return `${forceTLS ? 'https' : req.protocol}://${req.get('host')}${req.path}${route}`
+  }
 }
 
 module.exports = Endpoint
