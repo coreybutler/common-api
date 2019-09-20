@@ -26,7 +26,7 @@ const server = app.listen(() => console.log('Server is running.'))
 - [litmusTest([message])](#litmusTest([message]))
 - [validateJsonBody](#validateJsonBody)
 - [validNumericId](#validNumericId)
-- [validStringId](#validStringId)
+- [validId](#validId)
 - [validResult(res, callback)](#validresultres-callback)
 - [basicauth(user, password)](#basicauthuser-password)
 - [bearer(token)](#bearertoken)
@@ -101,18 +101,30 @@ Validates a request body exists and consists of valid JSON.
 ### validNumericId
 
 ```javascript
-app.post('/endpoint/:id', Endpoint.validNumericId, ...)
+app.post('/endpoint/:id', Endpoint.validNumericId(), ...)
 ```
 
-Assures `:id` is a valid numeric value. This also supports a query parameter, such as `/endpoint?id=12345`.
+Assures `:id` is a valid numeric value. This also supports a query parameter, such as `/endpoint?id=12345`. This will add an attribute to the `request` object (`req.id`).
 
-### validStringId
+An alternative argument name can be provided, such as:
 
 ```javascript
-app.post('/endpoint/:id', Endpoint.validNumericId, ...)
+app.post('/endpoint/:userid', Endpoint.validNumericId('userid'), ...)
 ```
 
-Assures `:id` exists, as a string. This also supports a query parameter, such as `/endpoint?id=some_id`.
+### validId
+
+```javascript
+app.post('/endpoint/:id', Endpoint.validId(), ...)
+```
+
+Assures `:id` exists, as a string. This also supports a query parameter, such as `/endpoint?id=some_id`. This will add an attribute to the `request` object (`req.id`).
+
+An alternative argument name can be provided, such as:
+
+```javascript
+app.post('/endpoint/:userid', Endpoint.validId('userid'), ...)
+```
 
 ### validResult(res, callback)
 
