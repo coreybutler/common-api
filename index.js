@@ -71,6 +71,26 @@ class Endpoint {
     }
   }
 
+  static validStringId(parameter = 'id') {
+    return function (req, res, next) {
+      if (!req.params[parameter]) {
+        return Endpoint.replyWithError(res, 400, 'No ID specified in URL.')
+      }
+
+      try {
+        let id = req.params[parameter].trim()
+        if (id.length === 0) {
+          throw new Error(`"${req.params[parameter]}" is an invalid ID.`)
+        }
+
+        req.id = id
+        next()
+      } catch (e) {
+        return Endpoint.replyWithError(res, 400, e.message)
+      }
+    }
+  }
+
   // Adds an `id` attribute to the request object.
   static validId (parameter = 'id') {
     return function (req, res, next) {
