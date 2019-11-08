@@ -398,7 +398,7 @@ The logs would look like:
 
 ### createUUID
 
-This utility method helps generate unique ID's. This is used to generatge the transaction ID for masked error output (`replyWithMaskedError` method).
+This utility method helps generate unique ID's. This is used to generate the transaction ID for masked error output (`replyWithMaskedError` method).
 
 ### atob(value)
 
