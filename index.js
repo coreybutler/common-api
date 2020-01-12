@@ -1,3 +1,4 @@
+const http = require('http')
 const chalk = require('chalk')
 const MustHave = require('musthave')
 const mh = new MustHave({
@@ -212,46 +213,6 @@ class Endpoint {
     }
   }
 
-  static HTTP200 (req, res) {
-    res.sendStatus(200)
-  }
-
-  static OK (req, res) {
-    Endpoint.HTTP200(...arguments)
-  }
-
-  static HTTP201 (req, res) {
-    res.sendStatus(201)
-  }
-
-  static CREATED (req, res) {
-    Endpoint.HTTP201(...arguments)
-  }
-
-  static HTTP401 (req, res) {
-    res.sendStatus(401)
-  }
-
-  static UNAUTHORIZED (req, res) {
-    Endpoint.HTTP401(...arguments)
-  }
-
-  static HTTP404 (req, res) {
-    res.sendStatus(404)
-  }
-
-  static NOT_FOUND (req, res) {
-    Endpoint.HTTP404(...arguments)
-  }
-
-  static HTTP501 (req, res) {
-    res.sendStatus(501)
-  }
-
-  static NOT_IMPLEMENTED (req, res) {
-    Endpoint.HTTP501(...arguments)
-  }
-
   static litmusTest (content = 'LITMUS TEST') {
     return (req, res, next) => {
       console.log(chalk.cyan(content))
@@ -414,5 +375,26 @@ class Endpoint {
     return `${forceTLS ? 'https' : req.protocol}://${req.get('host')}${req.path}${route}`
   }
 }
+
+// Add all known HTTP statuses
+Object.keys(http.STATUS_CODES).forEach(status => {
+  Object.defineProperty(Endpoint, `HTTP${status}`, {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: (req, res) => {
+      res.sendStatus(status)
+    }
+  })
+
+  Object.defineProperty(Endpoint, `${http.STATUS_CODES[status].replace(/\s+|-+/, '_').replace(/[^A-Z_]/gi, '').toUpperCase()}`, {
+    enumerable: true,
+    writable: false,
+    configurable: false,
+    value: (req, res, next) => {
+      Endpoint[`HTTP${status}`](req, res, next)
+    }
+  })
+})
 
 module.exports = Endpoint

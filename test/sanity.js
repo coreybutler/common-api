@@ -243,6 +243,9 @@ test('Apply Relative URL', t => {
     })
 })
 
-tasks.on('complete', () => server.close())
+tasks.on('complete', () => {
+  server.close()
+  console.log('------\nNOTICE: EXPECT AN ERROR IN THE OUTPUT ABOVE\nA JSON parsing error should be thrown.\nThis is intentional. It is used in the testing\nprocess to assure formatting errors are handled\ncorrectly.')
+})
 
 tasks.run(true)

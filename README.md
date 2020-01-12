@@ -44,6 +44,7 @@ const server = app.listen(() => console.log('Server is running.'))
 - [NOT_FOUND](#NOT_FOUND)
 - [501](#501)
 - [NOT_IMPLEMENTED](#NOT_IMPLEMENTED)
+- [Other HTTP Status Codes](#OTHER_STATUS_CODES)
 - [reply(anything)](#replyanything)
 - [replyWithError(res, [status, message]|error)](#replywitherrorres-status-messageerror)
 - [replyWithMaskedError(res, [status, message]|error)](#replywithmaskederrorres-status-messageerror)
@@ -320,6 +321,17 @@ app.post('/endpoint', Endpoint.NOT_IMPLEMENTED)
 ```
 
 Sends a status code `501` response.
+
+### OTHER_STATUS_CODES
+
+All of the standard status codes have shortcut methods available. Each HTTP status code has two methods associted with it: `HTTP###` and a method named by replacing spaces and hyphens in the the status message with underscores, removing special characters, and converting the whole message to upper case.
+
+For example, HTTP status 304 (Not Modified) would have a method `HTTP304` and `NOT_MODIFIED`.
+
+The [joke status](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/418), 418 (I'm a Teapot) illustrates how special characters are removed.
+
+- `HTTP418()`
+- `IM_A_TEAPOT()`
 
 ### reply(anything)
 
