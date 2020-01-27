@@ -1,18 +1,18 @@
 # Common API Utilities
 
-Like this project? Let people know with a [tweet](https://twitter.com/intent/tweet?hashtags=nodejs,expressjs&original_referer=http%3A%2F%2F127.0.0.1%3A91%2F&text=Check%20out%20@ecor%2fcommon-api%20for%20simplifying%20API%20development%20with%20Express!&tw_p=tweetbutton&url=http%3A%2F%2Fgithub.com%2Fbutlerlogic%2Fcommon-api&via=goldglovecb). 
+Like this project? Let people know with a [tweet](https://twitter.com/intent/tweet?hashtags=nodejs,expressjs&original_referer=http%3A%2F%2F127.0.0.1%3A91%2F&text=Check%20out%20@butlerlogic%2fcommon-api%20for%20simplifying%20API%20development%20with%20Express!&tw_p=tweetbutton&url=http%3A%2F%2Fgithub.com%2Fbutlerlogic%2Fcommon-api&via=goldglovecb). 
 
 This is a lightweight library containing a few commonly used methods for creating API's with Express.js.
 
 ## Installation:
 
-`npm install @ecor/common-api -S`
+`npm install @butlerlogic/common-api -S`
 
 ## Usage
 
 ```javascript
 const express = require('express')
-const Endpoint = require('@ecor/common-api')
+const Endpoint = require('@butlerlogic/common-api')
 const app = express()
 
 app.post('/endpoint', Endpoint.validateJsonBody, (req, res) => { ... })
@@ -197,7 +197,7 @@ app.get('/secure/path', Endpoint.bearer(function (token) {
 ```javascript
 const express = require('express')
 const app = express()
-const Endpoint = require('@ecor/common-api')
+const Endpoint = require('@butlerlogic/common-api')
 
 Endpoint.applyCommonConfiguration(app)
 ```
@@ -226,7 +226,7 @@ Endpoint.applyCommonConfiguration(app, false)
 ```javascript
 const express = require('express')
 const app = express()
-const Endpoint = require('@ecor/common-api')
+const Endpoint = require('@butlerlogic/common-api')
 
 Endpoint.applySimpleCORS(app)
 // Endpoint.applySimpleCORS(app, 'localhost')
