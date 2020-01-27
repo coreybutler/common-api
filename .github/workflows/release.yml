@@ -1,0 +1,37 @@
+name: Release
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Identify Tag
+      run: |
+        echo "::set-env name=HEAD_TAG::$(git tag --points-at HEAD)"
+        if [[ ${{ github.ref }} == *"-"* ]]; then echo "::set-env IS_PRERELEASE=true";else echo "::set-env IS_PRERELEASE=''";fi
+    - name: Create Prerelease
+      id: create_release
+      if: env.HEAD_TAG != '' && env.IS_PRERELEASE != ''
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: true
+    - name: Create Release
+      id: create_release
+      if: env.HEAD_TAG != '' && env.IS_PRERELEASE == ''
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+      
