@@ -2,7 +2,7 @@
 
 Like this project? Let people know with a [tweet](https://twitter.com/intent/tweet?hashtags=nodejs,expressjs&original_referer=http%3A%2F%2F127.0.0.1%3A91%2F&text=Check%20out%20@butlerlogic%2fcommon-api%20for%20simplifying%20API%20development%20with%20Express!&tw_p=tweetbutton&url=http%3A%2F%2Fgithub.com%2Fbutlerlogic%2Fcommon-api&via=goldglovecb). 
 
-This is a lightweight library containing a few commonly used methods for creating API's with Express.js.
+This is a lightweight library containing a few commonly used methods for creating API's with Express.js. It is ideally suited for prototyping API's.
 
 ## Installation:
 
