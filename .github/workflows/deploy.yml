@@ -43,8 +43,8 @@ jobs:
       env:
         REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
 
-    - name: Rollback Release on Failed Publish
-      if: failure() && steps.create_release.outputs.id != ''
+    - name: Rollback Failed Publish
+      if: failure()
       uses: author/action-rollback@master
       with:
         # Using a known release ID
