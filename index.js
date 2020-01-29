@@ -297,6 +297,18 @@ class Endpoint {
 
   static applySimpleCORS (app, host = '*') {
     app.use((req, res, next) => {
+      if (host === '*') {
+        try {
+          // Do not block localhost, regardless of port.
+          // Common use case: Running a web server and API 
+          // server on separate ports during dev, but under
+          // the same context (i.e. mimicking a production domain)
+          host = req.get('host').indexOf('localhost') === 0 ? req.get('host') : '*'
+        } catch (e) {
+          console.log(e)
+        }
+      }
+
       res.setHeader('Access-Control-Allow-Origin', host)
       res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
