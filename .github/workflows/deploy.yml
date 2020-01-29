@@ -40,7 +40,17 @@ jobs:
       id: publish_npm
       if: steps.autotagger.outputs.tagname != ''
       uses: author/action-publish@master
-      with:
-        token: ${{ secrets.REGISTRY_TOKEN }}
+      env:
+        REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
 
+    - name: Rollback Release on Failed Publish
+      if: failure() && steps.create_release.outputs.id != ''
+      uses: author/action-rollback@master
+      with:
+        # Using a known release ID
+        id: ${{ steps.create_release.id }}
+        # Using a tag name
+        tag: ${{ steps.autotagger.outputs.tagname }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
