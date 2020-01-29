@@ -47,7 +47,7 @@ jobs:
       if: failure()
       uses: author/action-rollback@master
       with:
-        id: ${{ steps.create_release.id }}
+        release_id: ${{ steps.create_release.id }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
