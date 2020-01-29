@@ -37,7 +37,7 @@ jobs:
         prerelease: env.IS_PRERELEASE != ''
 
     - name: Publish
-      id: publish_npm_mod
+      id: publish
       if: steps.autotagger.outputs.tagname != ''
       uses: author/action-publish@master
       env:
