@@ -42,6 +42,7 @@ jobs:
       uses: author/action-publish@master
       env:
         REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+        ACTIONS_STEP_DEBUG: true
 
     - name: Rollback
       if: failure()
@@ -50,4 +51,3 @@ jobs:
         release_id: ${{ steps.release.outputs.id }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ACTIONS_STEP_DEBUG: true
