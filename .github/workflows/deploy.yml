@@ -24,7 +24,7 @@ jobs:
         if [[ "${{ steps.autotagger.output.version }}" == *"-"* ]]; then echo "::set-env IS_PRERELEASE=true";else echo "::set-env IS_PRERELEASE=''";fi
 
     - name: Release
-      id: create_release
+      id: release
       if: steps.autotagger.outputs.tagname != ''
       uses: actions/create-release@v1.0.0
       env:
@@ -47,7 +47,7 @@ jobs:
       if: failure()
       uses: author/action-rollback@master
       with:
-        release_id: ${{ steps.create_release.id }}
+        release_id: ${{ steps.release.outputs.id }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
