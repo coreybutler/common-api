@@ -39,7 +39,7 @@ jobs:
     - name: Publish
       id: publish
       if: steps.autotagger.outputs.tagname != ''
-      uses: author/action-publish@master
+      uses: author/action-publish@stable
       with:
         token: ${{ secrets.REGISTRY_TOKEN }}
 
