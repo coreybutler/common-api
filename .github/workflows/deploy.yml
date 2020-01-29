@@ -6,7 +6,8 @@ on:
       - master
 
 jobs:
-  build:
+  publish:
+    name: Tag, Release, & Publish
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -30,7 +31,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.autotagger.outputs.tagname }}
-        release_name: ${{ github.ref }}
+        release_name: Version ${{ steps.autotagger.outputs.version }}
         body: ${{ steps.autotagger.outputs.tagmessage }}
         draft: false
         prerelease: env.IS_PRERELEASE != ''
