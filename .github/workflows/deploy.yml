@@ -43,7 +43,7 @@ jobs:
       env:
         REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
 
-    - name: Rollback on Failures
+    - name: Rollback
       if: failure()
       uses: author/action-rollback@master
       with:
