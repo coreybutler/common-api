@@ -43,9 +43,9 @@ jobs:
       env:
         REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
 
-    - name: Rollbacks
+    - name: Rollback
       if: failure()
-      uses: author/action-rollback@master
+      uses: author/action-rollback@stable
       with:
         release_id: ${{ steps.release.outputs.id }}
       env:
