@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish:
-    name: Deploy
+    name: Deploy Module
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
