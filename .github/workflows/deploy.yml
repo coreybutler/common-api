@@ -38,7 +38,8 @@ jobs:
     - name: Publish
       id: publish
       if: steps.autotagger.outputs.tagname != ''
-      uses: JS-DevTools/npm-publish@v1
+      uses: author/action-publish@stable
       with:
         token: ${{ secrets.REGISTRY_TOKEN }}
+
     
