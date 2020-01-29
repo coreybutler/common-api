@@ -36,7 +36,7 @@ jobs:
         draft: false
         prerelease: env.IS_PRERELEASE != ''
 
-    - name: Publish
+    - name: Publish to Registry
       id: publish_npm
       if: steps.autotagger.outputs.tagname != ''
       uses: author/action-publish@master
