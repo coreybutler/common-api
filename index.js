@@ -30,7 +30,12 @@ const getRandomValues = buf => {
 
 class Endpoint {
   constructor () {
-    this.__errorType = 'json'
+    Object.defineProperty(this, '__errorType', {
+      enumerable: false,
+      writable: true,
+      configurable: false,
+      value: 'text'
+    })
 
     // Add all known HTTP statuses
     Object.keys(http.STATUS_CODES).forEach(status => {
@@ -52,7 +57,7 @@ class Endpoint {
 
   set errorType (value) {
     value = (value || 'text').trim().toLowerCase()
-    if (['json', 'text'].indexOf(value)) {
+    if (['json', 'text'].indexOf(value) < 0) {
       value = 'text'
     }
 
@@ -398,7 +403,6 @@ class Endpoint {
     }
 
     res.statusMessage = message
-
     if (this.__errorType === 'json') {
       res.status(status).json({ status, message })
     } else {
