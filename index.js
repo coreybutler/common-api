@@ -262,7 +262,7 @@ class Endpoint {
   }
 
   log (req, res, next) {
-    console.log(chalk.gray(`${(new Date()).toLocaleTimeString()}: `) + this.color(req.method)(req.method) + chalk.gray(` ${req.url}`))
+    console.log(chalk.gray(`${(new Date()).toLocaleTimeString()}: `) + Endpoint.color(req.method)(req.method) + chalk.gray(` ${req.url}`))
     next()
   }
 
@@ -274,7 +274,7 @@ class Endpoint {
     next()
   }
 
-  color (method) {
+  static color (method) {
     return function () {
       let response = ''
 
