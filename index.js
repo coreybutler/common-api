@@ -29,13 +29,42 @@ const getRandomValues = buf => {
 }
 
 class Endpoint {
-  // Last argument must be a callback.
-  static validateJsonBody () {
-    let args = Array.from(arguments)
+  constructor () {
+    this.__errorType = 'json'
 
-    return function (req, res, next) {
+    // Add all known HTTP statuses
+    Object.keys(http.STATUS_CODES).forEach(status => {
+      Object.defineProperty(this, `HTTP${status}`, {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: (req, res) => res.sendStatus(status)
+      })
+
+      Object.defineProperty(this, `${http.STATUS_CODES[status].replace(/\s+|-+/, '_').replace(/[^A-Z_]/gi, '').toUpperCase()}`, {
+        enumerable: true,
+        writable: false,
+        configurable: false,
+        value: (req, res, next) => this[`HTTP${status}`](req, res, next)
+      })
+    })
+  }
+
+  set errorType (value) {
+    value = (value || 'text').trim().toLowerCase()
+    if (['json', 'text'].indexOf(value)) {
+      value = 'text'
+    }
+
+    this.__errorType = value
+  }
+
+  // Last argument must be a callback.
+  validateJsonBody () {
+    let args = Array.from(arguments)
+    return (req, res, next) => {
       if (!req.hasOwnProperty('body') || typeof req.body !== 'object') {
-        return Endpoint.replyWithError(res, 400, 'No JSON body supplied.')
+        return this.replyWithError(res, 400, 'No JSON body supplied.')
       }
 
       if (args.length === 0) {
@@ -43,7 +72,7 @@ class Endpoint {
       }
 
       if (!mh.hasAll(req.body, ...args)) {
-        return Endpoint.replyWithError(res, 400, `Missing parameters: ${mh.missing.join(', ')}`)
+        return this.replyWithError(res, 400, `Missing parameters: ${mh.missing.join(', ')}`)
       }
 
       next()
@@ -51,10 +80,10 @@ class Endpoint {
   }
 
   // Adds an `id` attribute to the request object.
-  static validNumericId (parameter = 'id') {
-    return function (req, res, next) {
+  validNumericId (parameter = 'id') {
+    return (req, res, next) => {
       if (!req.params[parameter]) {
-        return Endpoint.replyWithError(res, 400, 'No ID specified in URL.')
+        return this.replyWithError(res, 400, 'No ID specified in URL.')
       }
 
       try {
@@ -67,16 +96,16 @@ class Endpoint {
         req.id = id
         next()
       } catch (e) {
-        return Endpoint.replyWithError(res, 400, e.message)
+        return this.replyWithError(res, 400, e.message)
       }
     }
   }
 
   // Adds an `id` attribute to the request object.
-  static validId (parameter = 'id') {
-    return function (req, res, next) {
+  validId (parameter = 'id') {
+    return (req, res, next) => {
       if (!req.params[parameter]) {
-        return Endpoint.replyWithError(res, 400, 'No ID specified in URL.')
+        return this.replyWithError(res, 400, 'No ID specified in URL.')
       }
 
       try {
@@ -88,19 +117,19 @@ class Endpoint {
         req.id = id
         next()
       } catch (e) {
-        return Endpoint.replyWithError(res, 400, e.message)
+        return this.replyWithError(res, 400, e.message)
       }
     }
   }
 
-  // static validResult (res, callback) {
+  // validResult (res, callback) {
   //   return (err, result) => {
   //     if (err) {
   //       if (err.message.indexOf('does not exist')) {
-  //         return Endpoint.replyWithError(res, 404, err)
+  //         return this.replyWithError(res, 404, err)
   //       }
   //
-  //       return Endpoint.replyWithError(res, 500, err)
+  //       return this.replyWithError(res, 500, err)
   //     }
   //
   //     callback(result)
@@ -110,7 +139,7 @@ class Endpoint {
   // ASCII to Binary
   // This mimics the browser's window.atob function.
   // This is used to extract username/password from a request.
-  static atob (str) {
+  atob (str) {
     return Buffer.from(str, 'base64').toString('binary')
   }
 
@@ -144,13 +173,13 @@ class Endpoint {
    * @param  {string} password
    * The password to compare credentials with.
    */
-  static basicauth (username, password) {
-    return function (req, res, next) {
+  basicauth (username, password) {
+    return (req, res, next) => {
       if (req.get('Authorization')) {
         let credentials = (req.get('authorization')).split(/\s+/i).pop()
 
         if (credentials && credentials.trim().length > 0) {
-          credentials = Endpoint.atob(credentials).split(':')
+          credentials = this.atob(credentials).split(':')
 
           if (credentials.length === 2) {
             // If an authentication function is provided, use it
@@ -190,8 +219,8 @@ class Endpoint {
    * Determines whether the token comparison should be case sensitive or not.
    * This is ignored if the token argument is a custom function.
    */
-  static bearer (token, caseSensitive = true) {
-    return function (req, res, next) {
+  bearer (token, caseSensitive = true) {
+    return (req, res, next) => {
       if (req.get('authorization')) {
         let input = req.get('authorization').replace(/^(\s+)?bearer(\s+)?/i, '')
 
@@ -213,14 +242,14 @@ class Endpoint {
     }
   }
 
-  static litmusTest (content = 'LITMUS TEST') {
+  litmusTest (content = 'LITMUS TEST') {
     return (req, res, next) => {
       console.log(chalk.cyan(content))
       next()
     }
   }
 
-  static logErrors (err, req, res, next) {
+  logErrors (err, req, res, next) {
     if (err) {
       console.log(chalk.red.bold(err.message))
 
@@ -232,20 +261,20 @@ class Endpoint {
     next()
   }
 
-  static log (req, res, next) {
-    console.log(chalk.gray(`${(new Date()).toLocaleTimeString()}: `) + Endpoint.color(req.method)(req.method) + chalk.gray(` ${req.url}`))
+  log (req, res, next) {
+    console.log(chalk.gray(`${(new Date()).toLocaleTimeString()}: `) + this.color(req.method)(req.method) + chalk.gray(` ${req.url}`))
     next()
   }
 
   // Middleware for displaying headers.
   // This is useful for identifying headers sourced
   // from an API gateway or downstream proxy.
-  static logRequestHeaders (req, res, next) {
+  logRequestHeaders (req, res, next) {
     Object.keys(req.headers).forEach(header => console.log(chalk.cyan.bold(header.toLowerCase()) + ' --> ' + chalk.cyan(req.get(header))))
     next()
   }
 
-  static color (method) {
+  color (method) {
     return function () {
       let response = ''
 
@@ -275,13 +304,13 @@ class Endpoint {
     }
   }
 
-  static applyCommonConfiguration (app, autolog = true) {
+  applyCommonConfiguration (app, autolog = true) {
     // Rudimentary "security"
     app.disable('x-powered-by')
 
     // Basic logging
     if (autolog) {
-      app.use(Endpoint.log)
+      app.use(this.log)
     }
 
     // Healthcheck
@@ -295,12 +324,12 @@ class Endpoint {
     }))
   }
 
-  static applySimpleCORS (app, host = '*') {
+  applySimpleCORS (app, host = '*') {
     app.use((req, res, next) => {
       if (host === '*') {
         try {
           // Do not block localhost, regardless of port.
-          // Common use case: Running a web server and API 
+          // Common use case: Running a web server and API
           // server on separate ports during dev, but under
           // the same context (i.e. mimicking a production domain)
           host = req.get('host').indexOf('localhost') === 0 ? req.get('host') : '*'
@@ -322,7 +351,7 @@ class Endpoint {
    * @param {any} data
    * This can be an object or a JavaScript primitive (string, number, etc)
    */
-  static reply (data) {
+  reply (data) {
     if (typeof data !== 'object') {
       try {
         data = JSON.parse(data)
@@ -340,8 +369,8 @@ class Endpoint {
     }
   }
 
-  static replyWithMaskedError (res, status = 500, message = 'Server Error') {
-    let txnId = Endpoint.createUUID()
+  replyWithMaskedError (res, status = 500, message = 'Server Error') {
+    let txnId = this.createUUID()
 
     if (arguments[arguments.length - 1] instanceof Error) {
       status = typeof status === 'number' ? status : 400
@@ -350,10 +379,10 @@ class Endpoint {
 
     console.log(`[ERROR:${txnId}] (${status}) ${message}`)
 
-    Endpoint.replyWithError(res, status, `An error occurred. Reference: ${txnId}`)
+    this.replyWithError(res, status, `An error occurred. Reference: ${txnId}`)
   }
 
-  static replyWithError (res, status = 500, message = 'Server Error') {
+  replyWithError (res, status = 500, message = 'Server Error') {
     // If the last argument is an error, use it.
     // if (arguments.length > 0) {//arguments[arguments.length - 1]) {
     if (arguments[arguments.length - 1] instanceof Error) {
@@ -369,44 +398,29 @@ class Endpoint {
     }
 
     res.statusMessage = message
-    res.status(status).json({ status, message })
+
+    if (this.__errorType === 'json') {
+      res.status(status).json({ status, message })
+    } else {
+      res.status(status).send(message)
+    }
   }
 
   // Create a UUIDv4 unique ID.
-  static createUUID () {
+  createUUID () {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
       (c ^ getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     )
   }
 
-  static applyBaseUrl (req, route = '/', forceTLS = false) {
+  applyBaseUrl (req, route = '/', forceTLS = false) {
     return `${forceTLS ? 'https' : req.protocol}://${req.get('host')}${route}`
   }
 
-  static applyRelativeUrl (req, route = '/', forceTLS = false) {
+  applyRelativeUrl (req, route = '/', forceTLS = false) {
     return `${forceTLS ? 'https' : req.protocol}://${req.get('host')}${req.path}${route}`
   }
 }
 
-// Add all known HTTP statuses
-Object.keys(http.STATUS_CODES).forEach(status => {
-  Object.defineProperty(Endpoint, `HTTP${status}`, {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: (req, res) => {
-      res.sendStatus(status)
-    }
-  })
-
-  Object.defineProperty(Endpoint, `${http.STATUS_CODES[status].replace(/\s+|-+/, '_').replace(/[^A-Z_]/gi, '').toUpperCase()}`, {
-    enumerable: true,
-    writable: false,
-    configurable: false,
-    value: (req, res, next) => {
-      Endpoint[`HTTP${status}`](req, res, next)
-    }
-  })
-})
-
-module.exports = Endpoint
+const API = new Endpoint()
+module.exports = API

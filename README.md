@@ -59,6 +59,7 @@ const server = app.listen(() => console.log('Server is running.'))
 - [atob(value)](#atob(value))
 - [applyBaseUrl (req, route = '/' [, forceTLS = false])](#applybaseurl-req-route---forcetls--false)
 - [applyRelativeUrl (req, route = '/' [, forceTLS = false])](#applyrelativeurl-req-route---forcetls--false)
+- [errorType](#errorType)
 
 ## Middleware
 
@@ -460,4 +461,23 @@ If a request was made to `http://domain.com/my/path`, this would return:
 {
   "id": "http://domain.com/my/path/myid"
 }
+```
+
+### errorType
+
+By default, using replyWithError or replyWithMaskedError will produce standard text-based error reponses, such as `401 (Unauthorized)`.
+
+It is possible to produce JSON instead, resulting in:
+
+```json
+{
+  "status": 401,
+  "message": "Unauthorized"
+}
+```
+
+If JSON is needed, set the errorType to `json`.
+
+```javascript
+Endpoint.errorType = 'json'
 ```

@@ -1,6 +1,6 @@
 {
   "name": "@butlerlogic/common-api",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "A set of utilities for producing API's.",
   "main": "index.js",
   "scripts": {
