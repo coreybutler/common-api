@@ -57,7 +57,7 @@ jobs:
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         SLACK_USERNAME: Github # Optional. (defaults to webhook app)
         SLACK_CHANNEL: butlerlogic # Optional. (defaults to webhook)
-        SLACK_AVATAR: repository # Optional. can be (repository, sender, an URL) (defaults to webhook app avatar)
+        SLACK_AVATAR: https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Npm-logo.svg/320px-Npm-logo.svg.png
       uses: Ilshidur/action-slack@master
       with:
         args: '${{ steps.autotagger.outputs.tagname }} failed to publish and was rolled back.' # Optional
@@ -68,7 +68,7 @@ jobs:
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         SLACK_USERNAME: Github # Optional. (defaults to webhook app)
         SLACK_CHANNEL: releases # Optional. (defaults to webhook)
-        SLACK_AVATAR: repository # Optional. can be (repository, sender, an URL) (defaults to webhook app avatar)
+        SLACK_AVATAR: https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Npm-logo.svg/320px-Npm-logo.svg.png
       uses: Ilshidur/action-slack@master
       with:
         args: '@butlerlogic/common-api ${{ steps.autotagger.outputs.tagname }} published to npm.' # Optional
@@ -79,7 +79,7 @@ jobs:
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         SLACK_USERNAME: Github # Optional. (defaults to webhook app)
         SLACK_CHANNEL: releases # Optional. (defaults to webhook)
-        SLACK_AVATAR: repository # Optional. can be (repository, sender, an URL) (defaults to webhook app avatar)
+        SLACK_AVATAR: "https://cdn.freebiesupply.com/logos/large/2x/nodejs-icon-logo-png-transparent.png" # Optional. can be (repository, sender, an URL) (defaults to webhook app avatar)
       uses: Ilshidur/action-slack@master
       with:
         args: "New code was added to @butlerlogic/common-api's master branch." # Optional
