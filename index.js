@@ -330,8 +330,49 @@ class Endpoint {
   }
 
   applySimpleCORS (app, host = '*') {
+    if (arguments.length > 2) {
+      host = Array.from(arguments)
+      host.shift()
+    }
+
     app.use((req, res, next) => {
-      if (host === '*') {
+      this.allowOrigin(host)(req, res)
+      this.allowHeader('Origin', 'X-Requested-With', 'Content-Type', 'Accept')(req, res)
+      this.allowMethods('GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS')(req, res)
+
+      next()
+    })
+  }
+
+  allowMethods () {
+    return (req, res, next) => {
+      // Deduplicates methods
+      res.setHeader('Access-Control-Allow-Methods', Array.from(new Set(Array.from(arguments).map(m => m.toUpperCase()))))
+
+      if (next) {
+        next()
+      }
+    }
+  }
+
+  allowHeaders () {
+    return (req, res, next) => {
+      // Deduplicates headers
+      res.setHeader('Access-Control-Allow-Headers', Array.from(new Set(Array.from(arguments).map(h => h.toLowerCase()))))
+
+      if (next) {
+        next()
+      }
+    }
+  }
+
+  allowOrigins (host) {
+    if (!Array.isArray(host) && arguments.length > 1) {
+      host = Array.from(arguments)
+    }
+
+    return (req, res, next) => {
+      if (host === '*' || host.indexOf('*') >= 0) {
         try {
           // Do not block localhost, regardless of port.
           // Common use case: Running a web server and API
@@ -341,14 +382,23 @@ class Endpoint {
         } catch (e) {
           console.log(e)
         }
+      } else if (Array.isArray(host)) {
+        host = host.filter(h => h.trim().length > 0).map(h => h.toLowerCase())
+
+        const index = host.indexOf(req.get('host').toLowerCase())
+        if (index >= 0) {
+          host = host[index]
+        } else {
+          host = host[0] || req.get('host')
+        }
       }
 
       res.setHeader('Access-Control-Allow-Origin', host)
-      res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
 
-      next()
-    })
+      if (next) {
+        next()
+      }
+    }
   }
 
   /**

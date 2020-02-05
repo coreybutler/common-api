@@ -15,10 +15,10 @@ _There's a short walk-thru/guide/example available on [Quora](https://qr.ae/TW4E
 
 ```javascript
 const express = require('express')
-const Endpoint = require('@butlerlogic/common-api')
+const API = require('@butlerlogic/common-api')
 const app = express()
 
-app.post('/endpoint', Endpoint.validateJsonBody, (req, res) => { ... })
+app.post('/endpoint', API.validateJsonBody, (req, res) => { ... })
 
 const server = app.listen(() => console.log('Server is running.'))
 ```
@@ -37,6 +37,10 @@ const server = app.listen(() => console.log('Server is running.'))
 - [bearer(token)](#bearertoken)
 - [applyCommonConfiguration(app, [autolog])](#applycommonconfigurationapp-autolog)
 - [applySimpleCORS(app, host='*')](#applysimplecorsapp-host)
+- [allowHeaders('Origin', 'X-Requested-With')](#allowheaders-origin)
+- [allowMethods('GET', 'POST', 'OPTIONS')](#allowmethods-origin)
+- [allowMethods('GET', 'POST', 'OPTIONS')](#allowmethods-origin)
+- [allowOrigins('a.domain.com', 'b.domain.com')](#alloworigins-a)
 
 ### [Responses](#Responses)
 - [200](#200)
@@ -70,11 +74,11 @@ The following static methods are available:
 Configures a simple console logging utility (with colorized output). This can be used as middleware for all requests or individual requests.
 
 ```javascript
-app.use(Endpoint.log)
+app.use(API.log)
 ```
 
 ```javascript
-app.post('/endpoint', Endpoint.log, ...)
+app.post('/endpoint', API.log, ...)
 ```
 
 ### logRequestHeaders
@@ -82,11 +86,11 @@ app.post('/endpoint', Endpoint.log, ...)
 Configures a simple console logging utility (with colorized output), which will log the request headers of the request. This can be used as middleware for all requests or individual requests.
 
 ```javascript
-app.use(Endpoint.logRequestHeaders)
+app.use(API.logRequestHeaders)
 ```
 
 ```javascript
-app.post('/endpoint', Endpoint.logRequestHeaders, ...)
+app.post('/endpoint', API.logRequestHeaders, ...)
 ```
 
 ### litmusTest([message])
@@ -94,13 +98,13 @@ app.post('/endpoint', Endpoint.logRequestHeaders, ...)
 This pass-thru middleware component is useful for determining whether a route or responder is reachable or not. A message (`LITMUS TEST` by default) is logged to the console/stdout, without affecting the network request/response.
 
 ```javascript
-app.use('/endpoint', Endpoint.litmusTest('endpoint reachable'), ...)
+app.use('/endpoint', API.litmusTest('endpoint reachable'), ...)
 ```
 
 ### validateJsonBody
 
 ```javascript
-app.post('/endpoint', Endpoint.validateJsonBody, ...)
+app.post('/endpoint', API.validateJsonBody, ...)
 ```
 
 Validates a request body exists and consists of valid JSON.
@@ -108,7 +112,7 @@ Validates a request body exists and consists of valid JSON.
 ### validNumericId
 
 ```javascript
-app.post('/endpoint/:id', Endpoint.validNumericId(), ...)
+app.post('/endpoint/:id', API.validNumericId(), ...)
 ```
 
 Assures `:id` is a valid numeric value. This also supports a query parameter, such as `/endpoint?id=12345`. This will add an attribute to the `request` object (`req.id`).
@@ -116,13 +120,13 @@ Assures `:id` is a valid numeric value. This also supports a query parameter, su
 An alternative argument name can be provided, such as:
 
 ```javascript
-app.post('/endpoint/:userid', Endpoint.validNumericId('userid'), ...)
+app.post('/endpoint/:userid', API.validNumericId('userid'), ...)
 ```
 
 ### validId
 
 ```javascript
-app.post('/endpoint/:id', Endpoint.validId(), ...)
+app.post('/endpoint/:id', API.validId(), ...)
 ```
 
 Assures `:id` exists, as a string. This also supports a query parameter, such as `/endpoint?id=some_id`. This will add an attribute to the `request` object (`req.id`).
@@ -130,7 +134,7 @@ Assures `:id` exists, as a string. This also supports a query parameter, such as
 An alternative argument name can be provided, such as:
 
 ```javascript
-app.post('/endpoint/:userid', Endpoint.validId('userid'), ...)
+app.post('/endpoint/:userid', API.validId('userid'), ...)
 ```
 
 ### validResult(res, callback)
@@ -138,7 +142,7 @@ app.post('/endpoint/:userid', Endpoint.validId('userid'), ...)
 Inspects the result and returns a function that will throw an error or return results.
 
 ```javascript
-let checkResult = Endpoint.validResult(res, results => res.send(results))
+let checkResult = API.validResult(res, results => res.send(results))
 
 app.get('/endpoint', (req, res) => { ...processing... }, checkResult)
 ```
@@ -153,14 +157,14 @@ user-submitted username/password to `user` and `passwd`. If
 they do not match, a 401 (Not Authorized) response is sent.
 
 ```javascript
-app.get('/secure', Endpoint.basicauth('user', 'passwd'), (req, res) => ...)
+app.get('/secure', API.basicauth('user', 'passwd'), (req, res) => ...)
 ```
 
 It is also possible to perform a more advanced authentication
 using a custom function. For example:
 
 ```javascript
-app.get('/secure', Endpoint.basicauth(function (username, password, grantedFn, deniedFn) {
+app.get('/secure', API.basicauth(function (username, password, grantedFn, deniedFn) {
   if (confirmWithDatabase(username, password)) {
     grantedFn()
   } else {
@@ -177,7 +181,7 @@ and the `deniedFn()` should be run when it fails.
 This method looks for a bearer token in the `Authorization` request header. If the token does not match, a `401 (Unauthorized)` status is returned.
 
 ```javascript
-app.get('/secure/path', Endpoint.bearer('mytoken'), Endpoint.reply('authenticated'))
+app.get('/secure/path', API.bearer('mytoken'), API.reply('authenticated'))
 ```
 
 The code above would succeed for requests which contain the following request header:
@@ -191,9 +195,9 @@ Authorization: Bearer mytoken
 It is also possible to use a custom function to evaluate the request token. The function must by synchronous and return a boolean value (`true` or `false`).
 
 ```javascript
-app.get('/secure/path', Endpoint.bearer(function (token) {
+app.get('/secure/path', API.bearer(function (token) {
   return isValidToken(token)
-}), Endpoint.reply('authenticated'))
+}), API.reply('authenticated'))
 ```
 
 ### applyCommonConfiguration(app, [autolog])
@@ -201,9 +205,9 @@ app.get('/secure/path', Endpoint.bearer(function (token) {
 ```javascript
 const express = require('express')
 const app = express()
-const Endpoint = require('@butlerlogic/common-api')
+const API = require('@butlerlogic/common-api')
 
-Endpoint.applyCommonConfiguration(app)
+API.applyCommonConfiguration(app)
 ```
 
 This helper method is designed to rapidly implement common endpoints. This can be used throughout the testing phase or in production.
@@ -222,7 +226,7 @@ This also disables the `x-powered-by` header used in Express.
 By default, this method enables logging (using the log method). This can be turned off by passing `false` as a second argument:
 
 ```javascript
-Endpoint.applyCommonConfiguration(app, false)
+API.applyCommonConfiguration(app, false)
 ```
 
 ### applySimpleCORS(app, host='*')
@@ -230,13 +234,13 @@ Endpoint.applyCommonConfiguration(app, false)
 ```javascript
 const express = require('express')
 const app = express()
-const Endpoint = require('@butlerlogic/common-api')
+const API = require('@butlerlogic/common-api')
 
-Endpoint.applySimpleCORS(app)
-// Endpoint.applySimpleCORS(app, 'localhost')
+API.applySimpleCORS(app)
+// API.applySimpleCORS(app, 'localhost')
 ```
 
-Implementing CORS support while prototyping/developing an API can consume more time than most people anticipate. This method applies a simple CORS configuration so you can "continue coding". It is unlikely this configuration will be used in production environments unless the API is behind a secure gateway, but it helps temporarily resolve the most common challenges of _developing_ with CORS.
+Implementing [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) support while prototyping/developing an API can consume more time than most people anticipate. This method applies a simple CORS configuration so you can "continue coding". It is unlikely this configuration will be used in production environments unless the API is behind a secure gateway, but it helps temporarily resolve the most common challenges of _developing_ with CORS.
 
 This method applies 3 response headers to all responses:
 
@@ -244,6 +248,65 @@ This method applies 3 response headers to all responses:
 - `Access-Control-Allow-Headers`: Set to `'Origin, X-Requested-With, Content-Type, Accept'`
 - `Access-Control-Allow-Methods`: Set to `GET, POST, PATCH, DELETE, OPTIONS`
 
+## allowHeaders('Origin', 'X-Requested-With')
+
+This [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) middleware feature can be used to specify/override which HTTP headers are allowed to be sent with requests to the server (by endpoint). This automatically handles setting the appopriate `Access-Control-Allow-Headers` HTTP header.
+
+```javascript
+const express = require('express')
+const app = express()
+const API = require('@butlerlogic/common-api')
+
+API.applySimpleCORS(app)
+
+app.get('/special/endpoint, API.allowOrigins('a.domain.com', 'b.domain.com'), (req, res) => {...})
+```
+
+This can also be applied to all requests:
+
+```javascript
+app.use(API.allowOrigins('a.domain.com', 'b.domain.com'))
+```
+
+## allowOrigins('a.domain.com', 'b.domain.com')
+
+This [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) middleware feature can be used to specify/override which hosts are allowed to send requests to the server (by endpoint). This automatically handles setting the appopriate `Access-Control-Allow-Origin` HTTP header.
+
+```javascript
+const express = require('express')
+const app = express()
+const API = require('@butlerlogic/common-api')
+
+API.applySimpleCORS(app)
+
+app.get('/special/endpoint, API.allowOrigins('a.domain.com', 'b.domain.com'), (req, res) => {...})
+```
+
+This can also be applied to all requests:
+
+```javascript
+app.use(API.allowOrigins('a.domain.com', 'b.domain.com'))
+```
+
+## allowMethods('GET', 'POST', 'OPTIONS')
+
+This [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) middleware feature can be used to specify/override which methods are allowed to be used when making HTTP requests to a specific endpoint/route. This automatically handles setting the appopriate `Access-Control-Allow-Methods` HTTP header.
+
+```javascript
+const express = require('express')
+const app = express()
+const API = require('@butlerlogic/common-api')
+
+API.applySimpleCORS(app)
+
+app.get('/special/endpoint, API.allowMethods('PATCH', 'POST'), (req, res) => {...})
+```
+
+This can also be applied to all requests:
+
+```javascript
+app.use(API.allowMethods('GET'))
+```
 ---
 
 ## Responses
@@ -251,7 +314,7 @@ This method applies 3 response headers to all responses:
 ### 200
 
 ```javascript
-app.post('/endpoint', Endpoint.200)
+app.post('/endpoint', API.200)
 ```
 
 Sends a status code `200` response.
@@ -259,7 +322,7 @@ Sends a status code `200` response.
 ### OK
 
 ```javascript
-app.post('/endpoint', Endpoint.OK)
+app.post('/endpoint', API.OK)
 ```
 
 Sends a status code `200` response.
@@ -267,7 +330,7 @@ Sends a status code `200` response.
 ### 201
 
 ```javascript
-app.post('/endpoint', Endpoint.201)
+app.post('/endpoint', API.201)
 ```
 
 Sends a status code `201` response.
@@ -275,7 +338,7 @@ Sends a status code `201` response.
 ### CREATED
 
 ```javascript
-app.post('/endpoint', Endpoint.CREATED)
+app.post('/endpoint', API.CREATED)
 ```
 
 Sends a status code `201` response.
@@ -283,7 +346,7 @@ Sends a status code `201` response.
 ### 401
 
 ```javascript
-app.post('/endpoint', Endpoint.401)
+app.post('/endpoint', API.401)
 ```
 
 Sends a status code `401` response.
@@ -291,7 +354,7 @@ Sends a status code `401` response.
 ### UNAUTHORIZED
 
 ```javascript
-app.post('/endpoint', Endpoint.UNAUTHORIZED)
+app.post('/endpoint', API.UNAUTHORIZED)
 ```
 
 Sends a status code `401` response.
@@ -299,7 +362,7 @@ Sends a status code `401` response.
 ### 404
 
 ```javascript
-app.post('/endpoint', Endpoint.404)
+app.post('/endpoint', API.404)
 ```
 
 Sends a status code `404` response.
@@ -307,7 +370,7 @@ Sends a status code `404` response.
 ### NOT_FOUND
 
 ```javascript
-app.post('/endpoint', Endpoint.NOT_FOUND)
+app.post('/endpoint', API.NOT_FOUND)
 ```
 
 Sends a status code `404` response.
@@ -315,7 +378,7 @@ Sends a status code `404` response.
 ### 501
 
 ```javascript
-app.post('/endpoint', Endpoint.501)
+app.post('/endpoint', API.501)
 ```
 
 Sends a status code `501` response.
@@ -323,7 +386,7 @@ Sends a status code `501` response.
 ### NOT_IMPLEMENTED
 
 ```javascript
-app.post('/endpoint', Endpoint.NOT_IMPLEMENTED)
+app.post('/endpoint', API.NOT_IMPLEMENTED)
 ```
 
 Sends a status code `501` response.
@@ -346,7 +409,7 @@ A helper method to send objects as a JSON response, or to send plain text. This 
 _Example:_
 
 ```javascript
-app.get('/path', Endpoint.reply(myJsonObject))
+app.get('/path', API.reply(myJsonObject))
 ```
 
 ### replyWithError(res, [status, message]|error)
@@ -356,7 +419,7 @@ Send an HTTP error response. This function accepts two different kinds of argume
 ```javascript
 app.get('/myendpoint', (req, res) => {
   if (problem === true) {
-    Endpoint.replyWithError(res, 400, 'There is a problem.')
+    API.replyWithError(res, 400, 'There is a problem.')
   }
 })
 ```
@@ -368,14 +431,14 @@ Another option it to pass a JavaScript error as the last argument.
 ```javascript
 app.get('/myendpoint', (req, res) => {
   someFunction((err, data) => {
-    Endpoint.replyWithError(res, err)
+    API.replyWithError(res, err)
   })
 })
 
 // A custom HTTP status code can be used
 app.get('/myendpoint', (req, res) => {
   someFunction((err, data) => {
-    Endpoint.replyWithError(res, 404, err)
+    API.replyWithError(res, 404, err)
   })
 })
 ```
@@ -391,7 +454,7 @@ For example:
 ```javascript
 app.get('/myendpoint', (req, res) => {
   if (problem === true) {
-    Endpoint.replyWithMaskedError(res, 400, 'There is a problem connecting to the database.')
+    API.replyWithMaskedError(res, 400, 'There is a problem connecting to the database.')
   }
 })
 ```
@@ -428,7 +491,7 @@ Apply the base URL to the specified route. If `forceTLS` is set to `true`, the r
 ```javascript
 app.get('/my/path', (req, res) => {
   res.json({
-    id: Endpoint.applyBaseURL(req, 'myid')
+    id: API.applyBaseURL(req, 'myid')
   })
 })
 ```
@@ -450,7 +513,7 @@ Apply the relative URL to the specified route. If `forceTLS` is set to `true`, t
 ```javascript
 app.get('/my/path', (req, res) => {
   res.json({
-    id: Endpoint.applyBaseURL(req, 'myid')
+    id: API.applyBaseURL(req, 'myid')
   })
 })
 ```
@@ -479,5 +542,5 @@ It is possible to produce JSON instead, resulting in:
 If JSON is needed, set the errorType to `json`.
 
 ```javascript
-Endpoint.errorType = 'json'
+API.errorType = 'json'
 ```
