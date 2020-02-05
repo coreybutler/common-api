@@ -267,26 +267,6 @@ This can also be applied to all requests:
 app.use(API.allowOrigins('a.domain.com', 'b.domain.com'))
 ```
 
-## allowOrigins('a.domain.com', 'b.domain.com')
-
-This [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) middleware feature can be used to specify/override which hosts are allowed to send requests to the server (by endpoint). This automatically handles setting the appopriate `Access-Control-Allow-Origin` HTTP header.
-
-```javascript
-const express = require('express')
-const app = express()
-const API = require('@butlerlogic/common-api')
-
-API.applySimpleCORS(app)
-
-app.get('/special/endpoint, API.allowOrigins('a.domain.com', 'b.domain.com'), (req, res) => {...})
-```
-
-This can also be applied to all requests:
-
-```javascript
-app.use(API.allowOrigins('a.domain.com', 'b.domain.com'))
-```
-
 ## allowMethods('GET', 'POST', 'OPTIONS')
 
 This [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) middleware feature can be used to specify/override which methods are allowed to be used when making HTTP requests to a specific endpoint/route. This automatically handles setting the appopriate `Access-Control-Allow-Methods` HTTP header.
@@ -305,6 +285,26 @@ This can also be applied to all requests:
 
 ```javascript
 app.use(API.allowMethods('GET'))
+```
+
+## allowOrigins('a.domain.com', 'b.domain.com')
+
+This [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) middleware feature can be used to specify/override which hosts are allowed to send requests to the server (by endpoint). This automatically handles setting the appopriate `Access-Control-Allow-Origin` HTTP header.
+
+```javascript
+const express = require('express')
+const app = express()
+const API = require('@butlerlogic/common-api')
+
+API.applySimpleCORS(app)
+
+app.get('/special/endpoint, API.allowOrigins('a.domain.com', 'b.domain.com'), (req, res) => {...})
+```
+
+This can also be applied to all requests:
+
+```javascript
+app.use(API.allowOrigins('a.domain.com', 'b.domain.com'))
 ```
 ---
 
