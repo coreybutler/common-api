@@ -337,7 +337,7 @@ class Endpoint {
 
     app.use((req, res, next) => {
       this.allowOrigins(host)(req, res)
-      this.allowHeader('Origin', 'X-Requested-With', 'Content-Type', 'Accept')(req, res)
+      this.allowHeaders('Origin', 'X-Requested-With', 'Content-Type', 'Accept')(req, res)
       this.allowMethods('GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS')(req, res)
 
       next()
