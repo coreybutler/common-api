@@ -134,10 +134,14 @@ _Invalid JSON_
 ```json
 {
   "a": "text",
-  // Missing "b"
   "c": "text",
   "d": "extra is ok"
 }
+```
+
+_Produces:_
+```sh
+400 - Missing parameters: b
 ```
 
 ### validNumericId
