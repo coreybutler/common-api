@@ -19,7 +19,7 @@ const express = require('express')
 const API = require('@butlerlogic/common-api')
 const app = express()
 
-app.post('/endpoint', API.validateJsonBody, (req, res) => { ... })
+app.post('/endpoint', API.validateJsonBody(), (req, res) => { ... })
 
 const server = app.listen(() => console.log('Server is running.'))
 ```
@@ -104,10 +104,41 @@ app.use('/endpoint', API.litmusTest('endpoint reachable'), ...)
 ### validateJsonBody
 
 ```javascript
-app.post('/endpoint', API.validateJsonBody, ...)
+app.post('/endpoint', API.validateJsonBody(), ...)
 ```
 
 Validates a request body exists and consists of valid JSON.
+
+It is also possible to verify that the JSON body contains specific "top level" attributes (i.e. nesting is _not_ supported).
+
+For example, 
+
+```javascript
+app.post('/endpoint', API.validateJsonBody('a', 'b', 'c'), ...)
+```
+The code above will verify that the request body is valid JSON containing attributes `a`, `b`, and `c`.
+
+_Valid JSON_
+
+```json
+{
+  "a": "text",
+  "b": "text",
+  "c": "text",
+  "d": "extra is ok"
+}
+```
+
+_Invalid JSON_
+
+```json
+{
+  "a": "text",
+  // Missing "b"
+  "c": "text",
+  "d": "extra is ok"
+}
+```
 
 ### validNumericId
 
