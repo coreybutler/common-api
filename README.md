@@ -190,9 +190,12 @@ with the username and password.
 For example, `basicauth('user', 'passwd')` would compare the
 user-submitted username/password to `user` and `passwd`. If
 they do not match, a 401 (Not Authorized) response is sent.
+If authentication is successful, a `user` attribute will be 
+appended to the request (i.e. `req.user`).
 
 ```javascript
 app.get('/secure', API.basicauth('user', 'passwd'), (req, res) => ...)
+// req.user would be set "user" when authentication succeeds.
 ```
 
 It is also possible to perform a more advanced authentication
@@ -210,7 +213,9 @@ app.get('/secure', API.basicauth(function (username, password, grantedFn, denied
 
 The `username`/`password` will be supplied in plain text. The
 `grantedFn()` should be run when user authentication succeeds,
-and the `deniedFn()` should be run when it fails.
+and the `deniedFn()` should be run when it fails. Any downstream
+middleware or other handlers will be able to access the username
+by referencing `req.user`.
 
 ### bearer(token)
 This method looks for a bearer token in the `Authorization` request header. If the token does not match, a `401 (Unauthorized)` status is returned.
@@ -234,6 +239,11 @@ app.get('/secure/path', API.bearer(function (token) {
   return isValidToken(token)
 }), API.reply('authenticated'))
 ```
+
+Tokens do not necessarily represent a unique user, but they are often used
+to lookup a user. To facilitate this, the `req.user` attribute is set to the
+value of the token so downstream middleware can perform lookups or further
+validate the token.
 
 ### applyCommonConfiguration(app, [autolog])
 

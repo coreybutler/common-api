@@ -1,6 +1,6 @@
 {
   "name": "@butlerlogic/common-api",
-  "version": "1.3.10",
+  "version": "1.4.0",
   "description": "An API engineering productivity kit for Express.",
   "main": "index.js",
   "scripts": {

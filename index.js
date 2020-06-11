@@ -189,11 +189,15 @@ class Endpoint {
           if (credentials.length === 2) {
             // If an authentication function is provided, use it
             if (typeof username === 'function') {
-              return username(credentials[0], credentials[1], next, () => {
+              return username(credentials[0], credentials[1], () => {
+                req.user = credentials[0]
+                next()
+              }, () => {
                 res.set('WWW-Authenticate', `Basic realm=${req.get('host')}`)
                 return res.sendStatus(401)
               })
             } else if (credentials[0] === username && credentials[1] === password) {
+              req.user = username
               return next()
             }
           }
@@ -230,7 +234,8 @@ class Endpoint {
         let input = req.get('authorization').replace(/^(\s+)?bearer(\s+)?/i, '')
 
         if (typeof token === 'function') {
-          return token(input) ? next() : res.sendStatus(401)
+          let data = token(input)
+          return data ? () => { req.user = data; next() } : res.sendStatus(401)
         }
 
         if (!caseSensitive) {
@@ -239,6 +244,7 @@ class Endpoint {
         }
 
         if (input === token) {
+          req.user = token
           return next()
         }
       }
