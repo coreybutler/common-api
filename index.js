@@ -340,6 +340,15 @@ class Endpoint {
       this.allowHeaders('Origin', 'X-Requested-With', 'Content-Type', 'Accept')(req, res)
       this.allowMethods('GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS')(req, res)
 
+      // Support preflight requests
+      if (req.method.toUpperCase() === 'OPTIONS') {
+        if (req.headers['access-control-request-headers']) {
+          this.allowHeaders(...req.headers['access-control-request-headers'].split(','))(req, res)
+        }
+
+        return res.sendStatus(200)
+      }
+
       next()
     })
   }
@@ -378,7 +387,8 @@ class Endpoint {
           // Common use case: Running a web server and API
           // server on separate ports during dev, but under
           // the same context (i.e. mimicking a production domain)
-          host = req.get('host').indexOf('localhost') === 0 ? req.get('host') : '*'
+          host = req.get('origin') || req.get('referer')
+          host = host.indexOf('localhost') >= 0 ? host : '*'
         } catch (e) {
           console.log(e)
         }
