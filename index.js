@@ -476,6 +476,33 @@ class Endpoint {
     }
   }
 
+  /**
+   * Redirect the request to another location.
+   * @param {string} url
+   * The location to redirect to.
+   * @param {boolean} [permanent=false]
+   * Instruct the client that the redirect is permanent,
+   * suggesting all future requests should be made directly
+   * to the new location. When this is `false`, a HTTP `307`
+   * code is returned. When `true`, a HTTP `308` is returned.
+   * @param {boolean} [moved=false]
+   * Inform the client that the destination has been moved.
+   * When _moved_ is `true` and _permanent_ is `false`, an
+   * HTTP `303` (Found) status is returned, informing the
+   * client the request has been received and a `GET` request
+   * should be issued to the new location to retrieve it. When
+   * _permanent_ is `true`, a HTTP `301` is returned,
+   * indicating all future requests should be made directly to
+   * the new location.
+   */
+  redirect (url, permanent = false, moved = false) {
+    return (req, res) => {
+      const code = permanent ? (moved ? 301 : 308) : (moved ? 303 : 307)
+      res.header('location', url)
+      res.sendStatus(code)
+    }
+  }
+
   // Create a UUIDv4 unique ID.
   createUUID () {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>

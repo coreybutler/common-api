@@ -54,6 +54,7 @@ const server = app.listen(() => console.log('Server is running.'))
 - [501](#501)
 - [NOT_IMPLEMENTED](#NOT_IMPLEMENTED)
 - [Other HTTP Status Codes](#OTHER_STATUS_CODES)
+- [redirect(url, [permanent, moved])](#redirecturl-permanent-moved)
 - [reply(anything)](#replyanything)
 - [replyWithError(res, [status, message]|error)](#replywitherrorres-status-messageerror)
 - [replyWithMaskedError(res, [status, message]|error)](#replywithmaskederrorres-status-messageerror)
@@ -446,6 +447,62 @@ The [joke status](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/418),
 
 - `HTTP418()`
 - `IM_A_TEAPOT()`
+
+### redirect(url, [permanent, moved])
+
+A helper method for redirecting requests to another location. This is not a proxy, it does not actually forward requests. It tells the client the URL being requested is outdated and/or has been moved permanently/temporarily.
+
+This method exists since redirects have been used incorrectly in the past (by the entire industry). The redirect HTTP status codes changed in [RFC 7231](https://tools.ietf.org/html/rfc7231) (2014), but are still commonly disregarded. This method supplies the appropriate HTTP status codes without having to remember which code is proper for each circumstance.
+
+```javascript
+app.get('/path', API.redirect('https://elsewhere.com')) // 307
+// ^ equivalent of: app.get('/path', API.redirect('https://elsewhere.com', false, false))
+
+app.get('/path', API.redirect('https://elsewhere.com', true, false)) // 308
+app.get('/path', API.redirect('https://elsewhere.com', true, true)) // 301
+app.get('/path', API.redirect('https://elsewhere.com', false, true)) // 303
+```
+
+<details>
+<summary>HTTP Status Codes</summary>
+
+| Code | Purpose | Description |
+| - | - |- |
+|301|Moved Permanently|This and all future requests should be directed to the given URI.|
+|303|See Other|The response to the request can be found under another URI using the GET method. When received in response to a POST (or PUT/DELETE), the client should presume that the server has received the data and should issue a new GET request to the given URI.|
+|307|Temporary Redirect|In this case, the request should be repeated with another URI; however, future requests should still use the original URI. In contrast to how 302 was historically implemented, the request method is not allowed to be changed when reissuing the original request. For example, a POST request should be repeated using another POST request.|
+|308|Permanent Redirect|The request and all future requests should be repeated using another URI. 307 and 308 parallel the behaviors of 302 and 301, but do not allow the HTTP method to change. So, for example, submitting a form to a permanently redirected resource may continue smoothly.|
+
+> **302** (Found) is not a valid redirect code.
+>
+> Tells the client to look at (browse to) another URL. 302 has been superseded by 303 and 307. This is an example of industry practice contradicting the standard. The HTTP/1.0 specification (RFC 1945) required the client to perform a temporary redirect (the original describing phrase was "Moved Temporarily"),[21] but popular browsers implemented 302 with the functionality of a 303 See Other. Therefore, HTTP/1.1 added status codes 303 and 307 to distinguish between the two behaviours.[22] However, some Web applications and frameworks use the 302 status code as if it were the 303.
+</details>
+<details>
+<summary>From the API docs</summary>
+
+```javascript
+/**
+ * Redirect the request to another location.
+ * @param {string} url
+ * The location to redirect to.
+ * @param {boolean} [permanent=false]
+ * Instruct the client that the redirect is permanent,
+ * suggesting all future requests should be made directly
+ * to the new location. When this is `false`, a HTTP `307`
+ * code is returned. When `true`, a HTTP `308` is returned.
+ * @param {boolean} [moved=false]
+ * Inform the client that the destination has been moved.
+ * When _moved_ is `true` and _permanent_ is `false`, an
+ * HTTP `303` (Found) status is returned, informing the
+ * client the request has been received and a `GET` request
+ * should be issued to the new location to retrieve it. When
+ * _permanent_ is `true`, a HTTP `301` is returned,
+ * indicating all future requests should be made directly to
+ * the new location.
+ */
+```
+
+</details>
 
 ### reply(anything)
 
