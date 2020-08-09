@@ -498,6 +498,20 @@ class Endpoint {
   redirect (url, permanent = false, moved = false) {
     return (req, res) => {
       const code = permanent ? (moved ? 301 : 308) : (moved ? 303 : 307)
+
+      // Identify relative redirect
+      if (!/^\w+:\/{2}/i.test(url)) {
+        let uri = `${req.protocol}://${req.headers.host || req.host || req.hostname}`
+
+        if (/^\.+\//.test(url)) {
+          uri += req.path + '/' + url
+        } else {
+          uri += ('/' + url).replace(/^\/{2,}/, '/')
+        }
+
+        url = uri
+      }
+
       res.header('location', url)
       res.sendStatus(code)
     }
