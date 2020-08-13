@@ -291,23 +291,31 @@ class Endpoint {
 
       switch ((method || 'unknown').trim().toLowerCase()) {
         case 'post':
-          response = chalk.bgGreen(...arguments)
+          response = chalk.bgGreen.white(...arguments)
           break
 
         case 'put':
-          response = chalk.bgYellow(...arguments)
+          response = chalk.bgYellow.black(...arguments)
           break
 
         case 'delete':
-          response = chalk.bgRed(...arguments)
+          response = chalk.bgRed.white(...arguments)
           break
 
         case 'get':
-          response = chalk.bgMagenta(...arguments)
+          response = chalk.bgMagenta.black(...arguments)
+          break
+
+        case 'head':
+          response = chalk.bgBlue.white(...arguments)
+          break
+
+        case 'trace':
+          response = chalk.bgCyan.black(...arguments)
           break
 
         default:
-          response = chalk.bgWhite(...arguments)
+          response = chalk.bgWhite.black.dim(...arguments)
           break
       }
 
