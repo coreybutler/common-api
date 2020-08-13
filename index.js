@@ -344,7 +344,7 @@ class Endpoint {
     app.use((req, res, next) => {
       this.allowOrigins(host)(req, res)
       this.allowHeaders('Origin', 'X-Requested-With', 'Content-Type', 'Accept')(req, res)
-      this.allowMethods('GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS')(req, res)
+      this.allowMethods('GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS')(req, res)
 
       // Support preflight requests
       if (req.method.toUpperCase() === 'OPTIONS') {

@@ -292,7 +292,7 @@ This method applies 3 response headers to all responses:
 
 - `Access-Control-Allow-Origin`: By default, this is set to `*`, but the host can be modified by passing an optional 2nd argument to the function.
 - `Access-Control-Allow-Headers`: Set to `'Origin, X-Requested-With, Content-Type, Accept'`
-- `Access-Control-Allow-Methods`: Set to `GET, POST, PATCH, DELETE, OPTIONS`
+- `Access-Control-Allow-Methods`: Set to `GET, POST, PUT, PATCH, DELETE, OPTIONS`
 
 ## allowHeaders('Origin', 'X-Requested-With')
 
