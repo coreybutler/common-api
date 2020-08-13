@@ -375,6 +375,15 @@ class Endpoint {
     })
   }
 
+  allowAll (host = '*') {
+    return (req, res, next) => {
+      this.allowOrigins(...(arguments.length > 0 ? arguments : [host]))(req, res)
+      this.allowMethods(req.method)(req, res)
+      this.allowHeaders(...Object.keys(req.headers))(req, res)
+      this.allowPreflight(req, res, next)
+    }
+  }
+
   allowPreflight () {
     return (req, res, next) => {
       if (req.method.toUpperCase() === 'OPTIONS') {

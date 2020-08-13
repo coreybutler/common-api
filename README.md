@@ -42,6 +42,7 @@ const server = app.listen(() => console.log('Server is running.'))
 - [allowMethods('GET', 'POST', 'OPTIONS')](#allowmethodsget-post-options)
 - [allowOrigins('a.domain.com', 'b.domain.com')](#alloworiginsadomaincom-bdomaincom)
 - [allowPreflight()](#allowpreflight)
+- [allowAll('host')](#allowallhost)
 
 ### [Responses](#Responses)
 - [200](#200)
@@ -369,6 +370,25 @@ app.use(API.allowPreflight())
 // or
 
 app.any('/path', API.allowPreflight(), (req, res) => { ... })
+```
+
+## allowAll(host)
+
+This middleware uses CORS, allowing any request from the specified host(s). This should not be considered a secure or insecure method. Used appropriately, it can provide proper security at large scale. Used inappropriately, it can be insecure at any scale. Use with caution. Remember, this method is primarily useful for developing functional API's before locking them down with tighter security restrictions.
+
+```javascript
+// Allow anything from any domain (insecure)
+app.use(API.allowAll('*'))
+app.use(API.allowAll()) // Equivalent of above
+
+// Allow anything from my domain (semi-secure, limited to 1 domain)
+app.use(API.allowAll('mydomain.com'))
+
+// Applied to a specific endpoint (semi-secure, limited to 1 path on 1 domain)
+app.get('/endpoint', this.allowAll('mydomain.com'), (req, res) => { ... })
+
+// Applied to a specific endpoint for multiple sources
+app.get('/endpoint', this.allowAll('mydomain.com', 'mypartner.com'), (req, res) => { ... })
 ```
 
 ---
