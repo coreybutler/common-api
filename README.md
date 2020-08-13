@@ -41,6 +41,7 @@ const server = app.listen(() => console.log('Server is running.'))
 - [allowHeaders('Origin', 'X-Requested-With')](#allowheadersorigin-x-requested-with)
 - [allowMethods('GET', 'POST', 'OPTIONS')](#allowmethodsget-post-options)
 - [allowOrigins('a.domain.com', 'b.domain.com')](#alloworiginsadomaincom-bdomaincom)
+- [allowPreflight()](#allowpreflight)
 
 ### [Responses](#Responses)
 - [200](#200)
@@ -65,6 +66,7 @@ const server = app.listen(() => console.log('Server is running.'))
 - [applyBaseUrl (req, route = '/' [, forceTLS = false])](#applybaseurl-req-route---forcetls--false)
 - [applyRelativeUrl (req, route = '/' [, forceTLS = false])](#applyrelativeurl-req-route---forcetls--false)
 - [errorType](#errorType)
+- [commonHeaders](#commonHeaders)
 
 ## Middleware
 
@@ -353,6 +355,11 @@ This can also be applied to all requests:
 ```javascript
 app.use(API.allowOrigins('a.domain.com', 'b.domain.com'))
 ```
+
+## allowPreflight
+
+This middleware responds to `OPTIONS` requests with a `200 OK` response. This method is useful because it automatically applies the appropriate CORS configurations to support any request headers submitted to the endpoint.
+
 ---
 
 ## Responses
@@ -646,3 +653,9 @@ If JSON is needed, set the errorType to `json`.
 ```javascript
 API.errorType = 'json'
 ```
+
+### commonHeaders
+
+This is an array of the most common request headers used by HTTP clients. This is useful when constructing your own list of CORS headers using the `allowHeaders` method.
+
+Headers include: `Origin`, `X-Requested-With`, `Content-Type`, and `Accept`. This list may be updated from time to time.

@@ -28,13 +28,20 @@ const getRandomValues = buf => {
   return buf
 }
 
+function priv (value) {
+  return { enumerable: false, writable: true, configurable: false, value }
+}
+
+const ERROR_TYPES = new Set(['json', 'text'])
+const COMMON_HEADERS = new Set(['Origin', 'X-Requested-With', 'Content-Type', 'Accept'])
+
 class Endpoint {
   constructor () {
-    Object.defineProperty(this, '__errorType', {
-      enumerable: false,
-      writable: true,
-      configurable: false,
-      value: 'text'
+    Object.defineProperties(this, {
+      __errorType: priv('text')
+      // __allowedMethods: priv(new Set()),
+      // __allowedHeaders: priv(new Set()),
+      // __allowedOrigins: priv(new Set())
     })
 
     // Add all known HTTP statuses
@@ -57,11 +64,15 @@ class Endpoint {
 
   set errorType (value) {
     value = (value || 'text').trim().toLowerCase()
-    if (['json', 'text'].indexOf(value) < 0) {
+    if (!ERROR_TYPES.has(value)) {
       value = 'text'
     }
 
     this.__errorType = value
+  }
+
+  get commonHeaders () {
+    return Array.from(COMMON_HEADERS)
   }
 
   // Last argument must be a callback.
@@ -273,7 +284,7 @@ class Endpoint {
   }
 
   log (req, res, next) {
-    console.log(chalk.gray(`${(new Date()).toLocaleTimeString()}: `) + Endpoint.color(req.method)(req.method) + chalk.gray(` ${req.url}`))
+    console.log(chalk.dim(`${(new Date()).toLocaleTimeString()}: `) + Endpoint.color(req.method)(req.method) + chalk.dim(` ${req.url}`))
     next()
   }
 
@@ -351,10 +362,16 @@ class Endpoint {
 
     app.use((req, res, next) => {
       this.allowOrigins(host)(req, res)
-      this.allowHeaders('Origin', 'X-Requested-With', 'Content-Type', 'Accept')(req, res)
+      this.allowHeaders(...this.commonHeaders)(req, res)
       this.allowMethods('GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS')(req, res)
 
       // Support preflight requests
+      this.allowPreflight(req, res, next)
+    })
+  }
+
+  allowPreflight () {
+    return (req, res, next) => {
       if (req.method.toUpperCase() === 'OPTIONS') {
         if (req.headers['access-control-request-headers']) {
           this.allowHeaders(...req.headers['access-control-request-headers'].split(','))(req, res)
@@ -364,7 +381,7 @@ class Endpoint {
       }
 
       next()
-    })
+    }
   }
 
   allowMethods () {
