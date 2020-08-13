@@ -439,7 +439,7 @@ Sends a status code `501` response.
 
 ### OTHER_STATUS_CODES
 
-All of the standard status codes have shortcut methods available. Each HTTP status code has two methods associted with it: `HTTP###` and a method named by replacing spaces and hyphens in the the status message with underscores, removing special characters, and converting the whole message to upper case.
+All of the standard status codes have shortcut methods available. Each HTTP status code has two methods associated with it: `HTTP###` and a method named by replacing spaces and hyphens in the the status message with underscores, removing special characters, and converting the whole message to upper case.
 
 For example, HTTP status 304 (Not Modified) would have a method `HTTP304` and `NOT_MODIFIED`.
 
