@@ -356,9 +356,17 @@ This can also be applied to all requests:
 app.use(API.allowOrigins('a.domain.com', 'b.domain.com'))
 ```
 
-## allowPreflight
+## allowPreflight()
 
 This middleware responds to `OPTIONS` requests with a `200 OK` response. This method is useful because it automatically applies the appropriate CORS configurations to support any request headers submitted to the endpoint.
+
+```javascript
+app.use(API.allowPreflight())
+
+// or
+
+app.any('/path', API.allowPreflight(), (req, res) => { ... })
+```
 
 ---
 
