@@ -377,10 +377,12 @@ class Endpoint {
 
   allowAll (host = '*') {
     return (req, res, next) => {
+      const methods = new Set(Array.from(HTTP_METHODS).slice(0))
+
       this.allowOrigins(...(arguments.length > 0 ? arguments : [host]))(req, res)
-      this.allowMethods(req.method)(req, res)
+      this.allowMethods(...Array.from(methods))(req, res)
       this.allowHeaders(...Object.keys(req.headers))(req, res)
-      this.allowPreflight(req, res, next)
+      this.allowPreflight()(req, res, next)
     }
   }
 
