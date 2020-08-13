@@ -67,6 +67,7 @@ const server = app.listen(() => console.log('Server is running.'))
 - [applyRelativeUrl (req, route = '/' [, forceTLS = false])](#applyrelativeurl-req-route---forcetls--false)
 - [errorType](#errorType)
 - [commonHeaders](#commonHeaders)
+- [httpMethods](#httpMethods)
 
 ## Middleware
 
@@ -186,6 +187,7 @@ app.get('/endpoint', (req, res) => { ...processing... }, checkResult)
 ```
 
 ### basicauth(user, password)
+
 This method will perform basic authentication.
 It will compare the authentication header credentials
 with the username and password.
@@ -221,6 +223,7 @@ middleware or other handlers will be able to access the username
 by referencing `req.user`.
 
 ### bearer(token)
+
 This method looks for a bearer token in the `Authorization` request header. If the token does not match, a `401 (Unauthorized)` status is returned.
 
 ```javascript
@@ -666,4 +669,28 @@ API.errorType = 'json'
 
 This is an array of the most common request headers used by HTTP clients. This is useful when constructing your own list of CORS headers using the `allowHeaders` method.
 
+```javascript
+console.log(API.commonHeaders)
+```
+
 Headers include: `Origin`, `X-Requested-With`, `Content-Type`, and `Accept`. This list may be updated from time to time.
+
+### httpMethods
+
+An array of the official HTTP methods.
+
+```javascript
+console.log(API.httpMethods)
+```
+
+Includes:
+
+- `GET`
+- `HEAD`
+- `POST`
+- `PUT`
+- `DELETE`
+- `CONNECT`
+- `OPTIONS`
+- `TRACE`
+- `PATCH`

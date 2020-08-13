@@ -34,6 +34,7 @@ function priv (value) {
 
 const ERROR_TYPES = new Set(['json', 'text'])
 const COMMON_HEADERS = new Set(['Origin', 'X-Requested-With', 'Content-Type', 'Accept'])
+const HTTP_METHODS = new Set(['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH'])
 
 class Endpoint {
   constructor () {
@@ -73,6 +74,10 @@ class Endpoint {
 
   get commonHeaders () {
     return Array.from(COMMON_HEADERS)
+  }
+
+  get httpMethods () {
+    return Array.from(HTTP_METHODS)
   }
 
   // Last argument must be a callback.
