@@ -27,8 +27,9 @@ const server = app.listen(() => console.log('Server is running.'))
 ## Shortcuts
 
 ### [Request Middleware](#Middleware)
-- [log](#log)
-- [logRequestHeaders](#logRequestHeaders)
+- [log()](#log)
+- [logRequestHeaders()](#logRequestHeaders)
+- [logRedirects([bool])](#logRedirectsbool)
 - [litmusTest([message])](#litmustestmessage))
 - [validateJsonBody](#validateJsonBody)
 - [validNumericId](#validNumericId)
@@ -96,6 +97,22 @@ app.use(API.logRequestHeaders)
 
 ```javascript
 app.post('/endpoint', API.logRequestHeaders, ...)
+```
+
+### logRedirects([bool])
+
+Toggle redirect logging. This is _not middleware_. It is just a function to determine whether redirected requests should be logged to the console or not.
+
+```javascript
+API.logRedirects() // Defaults to `true`
+API.logRedirects(true)
+API.logRedirects(false)
+```
+
+When active, this will log a message like:
+
+```sh
+Redirect GET /redirect → http://domain.com/endpoint
 ```
 
 ### litmusTest([message])

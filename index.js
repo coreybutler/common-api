@@ -39,10 +39,11 @@ const HTTP_METHODS = new Set(['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT',
 class Endpoint {
   constructor () {
     Object.defineProperties(this, {
-      __errorType: priv('text')
+      __errorType: priv('text'),
       // __allowedMethods: priv(new Set()),
       // __allowedHeaders: priv(new Set()),
-      // __allowedOrigins: priv(new Set())
+      // __allowedOrigins: priv(new Set()),
+      __logRedirects: priv(false)
     })
 
     // Add all known HTTP statuses
@@ -301,6 +302,10 @@ class Endpoint {
     next()
   }
 
+  logRedirects (v = true) {
+    this.__logRedirects = v
+  }
+
   static color (method) {
     return function () {
       let response = ''
@@ -392,7 +397,6 @@ class Endpoint {
         if (req.headers['access-control-request-headers']) {
           this.allowHeaders(...req.headers['access-control-request-headers'].split(','))(req, res)
         }
-
         return res.sendStatus(200)
       }
 
@@ -538,6 +542,10 @@ class Endpoint {
    */
   redirect (url, permanent = false, moved = false) {
     return (req, res) => {
+      if (this.__logRedirects) {
+        console.log(`Redirect ${chalk.dim.yellow(req.method.toUpperCase() + ' ' + chalk.bold(req.url))} ${chalk.dim('→')} ${chalk.blueBright(url)}`)
+      }
+
       const code = permanent ? (moved ? 301 : 308) : (moved ? 303 : 307)
 
       // Identify relative redirect
